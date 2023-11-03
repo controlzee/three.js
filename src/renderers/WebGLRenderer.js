@@ -820,6 +820,10 @@ THREE.WebGLRenderer = function ( parameters ) {
 						renderer.setMode( _gl.TRIANGLE_FAN );
 						break;
 
+					case THREE.PointsDrawMode:
+						renderer.setMode( _gl.POINTS );
+						break;
+
 				}
 
 			}
