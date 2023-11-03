@@ -153,12 +153,12 @@ Object.assign( THREE.Skeleton.prototype, {
 			for ( var b = 0, bl = this.bones.length; b < bl; b ++ ) {
 
 				// compute the offset between the current and the original transform
-
-				var matrix = this.bones[ b ] ? this.bones[ b ].matrixWorld : this.identityMatrix;
-
-				offsetMatrix.multiplyMatrices( matrix, this.boneInverses[ b ] );
-				offsetMatrix.toArray( this.boneMatrices, b * 16 );
-
+					if ( this.bones[ b ] ) {
+						offsetMatrix.multiplyMatrices( this.bones[ b ].matrixWorld, this.boneInverses[ b ] );
+						offsetMatrix.toArray( this.boneMatrices, b * 16 );
+					} else {
+						this.identityMatrix.toArray( this.boneMatrices, b * 16 );
+					}
 			}
 
 			if ( this.useVertexTexture ) {
