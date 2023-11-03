@@ -4,6 +4,8 @@
 
 		uniform sampler2D directionalShadowMap[ NUM_DIR_LIGHTS ];
 		varying vec4 vDirectionalShadowCoord[ NUM_DIR_LIGHTS ];
+		uniform sampler2D directionalExShadowMap[ NUM_DIR_LIGHTS ];
+		varying vec4 vDirectionalExShadowCoord[ NUM_DIR_LIGHTS ];
 
 	#endif
 
@@ -49,22 +51,7 @@
 
 	}
 
-	float getShadow( sampler2D shadowMap, vec2 shadowMapSize, float shadowBias, float shadowRadius, vec4 shadowCoord ) {
-
-		shadowCoord.xyz /= shadowCoord.w;
-		shadowCoord.z += shadowBias;
-
-		// if ( something && something ) breaks ATI OpenGL shader compiler
-		// if ( all( something, something ) ) using this instead
-
-		bvec4 inFrustumVec = bvec4 ( shadowCoord.x >= 0.0, shadowCoord.x <= 1.0, shadowCoord.y >= 0.0, shadowCoord.y <= 1.0 );
-		bool inFrustum = all( inFrustumVec );
-
-		bvec2 frustumTestVec = bvec2( inFrustum, shadowCoord.z <= 1.0 );
-
-		bool frustumTest = all( frustumTestVec );
-
-		if ( frustumTest ) {
+		float getShadowSample( sampler2D shadowMap, vec2 shadowMapSize, float shadowBias, float shadowRadius, vec4 shadowCoord ) {
 
 		#if defined( SHADOWMAP_TYPE_PCF )
 
@@ -116,6 +103,68 @@
 
 		}
 
+	float getShadow( sampler2D shadowMap, vec2 shadowMapSize, float shadowBias, float shadowRadius, vec4 shadowCoord ) {
+
+		shadowCoord.xyz /= shadowCoord.w;
+		shadowCoord.z += shadowBias;
+
+		// if ( something && something ) breaks ATI OpenGL shader compiler
+		// if ( all( something, something ) ) using this instead
+
+		bvec4 inFrustumVec = bvec4 ( shadowCoord.x >= 0.0, shadowCoord.x <= 1.0, shadowCoord.y >= 0.0, shadowCoord.y <= 1.0 );
+		bool inFrustum = all( inFrustumVec );
+
+		bvec2 frustumTestVec = bvec2( inFrustum, shadowCoord.z <= 1.0 );
+
+		bool frustumTest = all( frustumTestVec );
+
+		if ( frustumTest ) {
+
+			return getShadowSample(shadowMap, shadowMapSize, shadowBias, shadowRadius, shadowCoord);
+
+		}
+
+		return 1.0;
+
+	}
+
+	float getDirShadow( sampler2D shadowMapA, vec2 shadowMapSizeA, vec4 shadowCoordA, sampler2D shadowMapB, vec2 shadowMapSizeB, vec4 shadowCoordB, float shadowBias, float shadowRadius ) {
+
+		shadowCoordA.xyz /= shadowCoordA.w;
+		shadowCoordA.z += shadowBias;
+		shadowCoordB.xyz /= shadowCoordB.w;
+		shadowCoordB.z += shadowBias;
+
+		// if ( something && something ) breaks ATI OpenGL shader compiler
+		// if ( all( something, something ) ) using this instead
+
+		bvec4 inFrustumVec = bvec4 ( shadowCoordA.x >= 0.0, shadowCoordA.x <= 1.0, shadowCoordA.y >= 0.0, shadowCoordA.y <= 1.0 );
+		bool inFrustum = all( inFrustumVec );
+
+		bvec2 frustumTestVec = bvec2( inFrustum, shadowCoordA.z <= 1.0 );
+
+		bool frustumTest = all( frustumTestVec );
+
+		if ( frustumTest ) {
+
+			return getShadowSample(shadowMapA, shadowMapSizeA, shadowBias, shadowRadius, shadowCoordA);
+
+		} else {
+
+			inFrustumVec = bvec4 ( shadowCoordB.x >= 0.0, shadowCoordB.x <= 1.0, shadowCoordB.y >= 0.0, shadowCoordB.y <= 1.0 );
+			inFrustum = all( inFrustumVec );
+
+			frustumTestVec = bvec2( inFrustum, shadowCoordB.z <= 1.0 );
+
+			frustumTest = all( frustumTestVec );
+
+			if ( frustumTest ) {
+
+				return getShadowSample(shadowMapB, shadowMapSizeB, shadowBias, shadowRadius, shadowCoordB);
+
+			}
+
+		}
 		return 1.0;
 
 	}

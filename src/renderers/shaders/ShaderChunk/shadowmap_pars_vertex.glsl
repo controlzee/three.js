@@ -4,7 +4,8 @@
 
 		uniform mat4 directionalShadowMatrix[ NUM_DIR_LIGHTS ];
 		varying vec4 vDirectionalShadowCoord[ NUM_DIR_LIGHTS ];
-
+    uniform mat4 directionalExShadowMatrix[ NUM_DIR_LIGHTS ];
+    varying vec4 vDirectionalExShadowCoord[ NUM_DIR_LIGHTS ];
 	#endif
 
 	#if NUM_SPOT_LIGHTS > 0

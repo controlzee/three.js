@@ -94,6 +94,164 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 	this.renderReverseSided = true;
 	this.renderSingleSided = true;
 
+	this.updateShadowMat = function( shadowMatrix, light, shadowCamera) {
+
+		_lightPositionWorld.setFromMatrixPosition( light.matrixWorld );
+		shadowCamera.position.copy( _lightPositionWorld );
+
+		_lookTarget.setFromMatrixPosition( light.target.matrixWorld );
+		shadowCamera.lookAt( _lookTarget );
+
+		shadowCamera.updateMatrixWorld();
+		shadowCamera.matrixWorldInverse.getInverse( shadowCamera.matrixWorld );
+
+		// compute shadow matrix
+
+		shadowMatrix.set(
+			0.5, 0.0, 0.0, 0.5,
+			0.0, 0.5, 0.0, 0.5,
+			0.0, 0.0, 0.5, 0.5,
+			0.0, 0.0, 0.0, 1.0
+		);
+
+		shadowMatrix.multiply( shadowCamera.projectionMatrix );
+		shadowMatrix.multiply( shadowCamera.matrixWorldInverse );
+
+		// update camera matrices and frustum
+
+		_projScreenMatrix.multiplyMatrices( shadowCamera.projectionMatrix, shadowCamera.matrixWorldInverse );
+		_frustum.setFromMatrix( _projScreenMatrix );
+
+	}
+
+	this.renderShadowMap = function( scene, camera, shadowMap, shadowMatrix, light, shadowCamera, faceCount, isPointLight ) {
+
+		_lightPositionWorld.setFromMatrixPosition( light.matrixWorld );
+		shadowCamera.position.copy( _lightPositionWorld );
+
+		_renderer.setRenderTarget( shadowMap );
+		_renderer.clear();
+
+		// render shadow map for each cube face (if omni-directional) or
+		// run a single pass if not
+
+	for ( var face = 0; face < faceCount; face ++ ) {
+
+		if ( isPointLight ) {
+
+			_lookTarget.copy( shadowCamera.position );
+			_lookTarget.add( cubeDirections[ face ] );
+			shadowCamera.up.copy( cubeUps[ face ] );
+			shadowCamera.lookAt( _lookTarget );
+
+			var vpDimensions = cube2DViewPorts[ face ];
+			_state.viewport( vpDimensions );
+
+		} else {
+
+			_lookTarget.setFromMatrixPosition( light.target.matrixWorld );
+			shadowCamera.lookAt( _lookTarget );
+
+		}
+
+		shadowCamera.updateMatrixWorld();
+		shadowCamera.matrixWorldInverse.getInverse( shadowCamera.matrixWorld );
+
+		// compute shadow matrix
+
+		shadowMatrix.set(
+			0.5, 0.0, 0.0, 0.5,
+			0.0, 0.5, 0.0, 0.5,
+			0.0, 0.0, 0.5, 0.5,
+			0.0, 0.0, 0.0, 1.0
+		);
+
+		shadowMatrix.multiply( shadowCamera.projectionMatrix );
+		shadowMatrix.multiply( shadowCamera.matrixWorldInverse );
+
+		// update camera matrices and frustum
+
+		_projScreenMatrix.multiplyMatrices( shadowCamera.projectionMatrix, shadowCamera.matrixWorldInverse );
+		_frustum.setFromMatrix( _projScreenMatrix );
+
+		// set object matrices & frustum culling
+
+		_renderList.length = 0;
+
+		projectObject( scene, camera, shadowCamera );
+
+		// render shadow map
+		// render regular objects
+
+		for ( var j = 0, jl = _renderList.length; j < jl; j ++ ) {
+
+			var object = _renderList[ j ];
+			var geometry = _objects.update( object );
+			var material = object.material;
+
+			if ( material instanceof THREE.MultiMaterial ) {
+
+				var groups = geometry.groups;
+				var materials = material.materials;
+
+				for ( var k = 0, kl = groups.length; k < kl; k ++ ) {
+
+					var group = groups[ k ];
+					var groupMaterial = materials[ group.materialIndex ];
+
+					if ( groupMaterial.visible === true ) {
+
+						var depthMaterial = getDepthMaterial( object, groupMaterial, isPointLight, _lightPositionWorld );
+						_renderer.renderBufferDirect( shadowCamera, null, geometry, depthMaterial, object, group );
+
+					}
+
+				}
+
+			} else {
+
+				var depthMaterial = getDepthMaterial( object, material, isPointLight, _lightPositionWorld );
+				_renderer.renderBufferDirect( shadowCamera, null, geometry, depthMaterial, object, null );
+
+			}
+
+		}
+
+	}
+
+}
+
+	this.renderIntoMap = function ( scene, camera, light, shadow ) {
+
+		var faceCount = 1;
+		var isPointLight = false;
+
+		if ( light instanceof THREE.PointLight ) {
+
+			faceCount = 6;
+			isPointLight = true;
+
+		}
+
+		var shadowCamera = shadow.camera;
+
+		// Set GL state for depth map.
+		_state.clearColor( 1, 1, 1, 1 );
+		_state.disable( _gl.BLEND );
+		_state.setDepthTest( true );
+		_state.setScissorTest( false );
+
+		this.renderShadowMap( scene, camera, shadow.map, shadow.matrix, light, shadowCamera, faceCount, isPointLight);
+
+		// Restore GL state.
+		var clearColor = _renderer.getClearColor(),
+			clearAlpha = _renderer.getClearAlpha();
+
+		_renderer.setClearColor( clearColor, clearAlpha );
+
+		scope.needsUpdate = false;
+	}
+
 	this.render = function ( scene, camera ) {
 
 		if ( scope.enabled === false ) return;
@@ -108,8 +266,8 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 		_state.setScissorTest( false );
 
 		// render depth map
-
-		var faceCount, isPointLight;
+		var faceCount;
+		var isPointLight;
 
 		for ( var i = 0, il = _lightShadows.length; i < il; i ++ ) {
 
@@ -187,110 +345,15 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 
 			}
 
-			var shadowMap = shadow.map;
-			var shadowMatrix = shadow.matrix;
-
-			_lightPositionWorld.setFromMatrixPosition( light.matrixWorld );
-			shadowCamera.position.copy( _lightPositionWorld );
-
-			_renderer.setRenderTarget( shadowMap );
-			_renderer.clear();
-
-			// render shadow map for each cube face (if omni-directional) or
-			// run a single pass if not
-
-			for ( var face = 0; face < faceCount; face ++ ) {
-
-				if ( isPointLight ) {
-
-					_lookTarget.copy( shadowCamera.position );
-					_lookTarget.add( cubeDirections[ face ] );
-					shadowCamera.up.copy( cubeUps[ face ] );
-					shadowCamera.lookAt( _lookTarget );
-
-					var vpDimensions = cube2DViewPorts[ face ];
-					_state.viewport( vpDimensions );
-
-				} else {
-
-					_lookTarget.setFromMatrixPosition( light.target.matrixWorld );
-					shadowCamera.lookAt( _lookTarget );
-
-				}
-
-				shadowCamera.updateMatrixWorld();
-				shadowCamera.matrixWorldInverse.getInverse( shadowCamera.matrixWorld );
-
-				// compute shadow matrix
-
-				shadowMatrix.set(
-					0.5, 0.0, 0.0, 0.5,
-					0.0, 0.5, 0.0, 0.5,
-					0.0, 0.0, 0.5, 0.5,
-					0.0, 0.0, 0.0, 1.0
-				);
-
-				shadowMatrix.multiply( shadowCamera.projectionMatrix );
-				shadowMatrix.multiply( shadowCamera.matrixWorldInverse );
-
-				// update camera matrices and frustum
-
-				_projScreenMatrix.multiplyMatrices( shadowCamera.projectionMatrix, shadowCamera.matrixWorldInverse );
-				_frustum.setFromMatrix( _projScreenMatrix );
-
-				// set object matrices & frustum culling
-
-				_renderList.length = 0;
-
-				projectObject( scene, camera, shadowCamera );
-
-				// render shadow map
-				// render regular objects
-
-				for ( var j = 0, jl = _renderList.length; j < jl; j ++ ) {
-
-					var object = _renderList[ j ];
-					var geometry = _objects.update( object );
-					var material = object.material;
-
-					if ( material instanceof THREE.MultiMaterial ) {
-
-						var groups = geometry.groups;
-						var materials = material.materials;
-
-						for ( var k = 0, kl = groups.length; k < kl; k ++ ) {
-
-							var group = groups[ k ];
-							var groupMaterial = materials[ group.materialIndex ];
-
-							if ( groupMaterial.visible === true ) {
-
-								var depthMaterial = getDepthMaterial( object, groupMaterial, isPointLight, _lightPositionWorld );
-								_renderer.renderBufferDirect( shadowCamera, null, geometry, depthMaterial, object, group );
-
-							}
-
-						}
-
-					} else {
-
-						var depthMaterial = getDepthMaterial( object, material, isPointLight, _lightPositionWorld );
-						_renderer.renderBufferDirect( shadowCamera, null, geometry, depthMaterial, object, null );
-
-					}
-
-				}
-
-			}
-
+			this.renderShadowMap( scene, camera, shadow.map, shadow.matrix, light, shadowCamera, faceCount, isPointLight);
 		}
 
-		// Restore GL state.
-		var clearColor = _renderer.getClearColor(),
-		clearAlpha = _renderer.getClearAlpha();
-		_renderer.setClearColor( clearColor, clearAlpha );
+			// Restore GL state.
+			var clearColor = _renderer.getClearColor(),
+			clearAlpha = _renderer.getClearAlpha();
+			_renderer.setClearColor( clearColor, clearAlpha );
 
-		scope.needsUpdate = false;
+			scope.needsUpdate = false;
 
 	};
 
@@ -379,7 +442,15 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 
 		}
 
-		result.side = side;
+		if ( customMaterial !== undefined ) {
+
+      result.side = customMaterial.overrideShadowDepthSide;
+
+    } else {
+
+      result.side = side;
+
+    }
 
 		result.clipShadows = material.clipShadows;
 		result.clippingPlanes = material.clippingPlanes;

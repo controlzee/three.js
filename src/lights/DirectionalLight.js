@@ -15,6 +15,7 @@ THREE.DirectionalLight = function ( color, intensity ) {
 	this.target = new THREE.Object3D();
 
 	this.shadow = new THREE.DirectionalLightShadow();
+	this.shadowEx = new THREE.DirectionalLightShadow();
 
 };
 
@@ -29,6 +30,7 @@ THREE.DirectionalLight.prototype = Object.assign( Object.create( THREE.Light.pro
 		this.target = source.target.clone();
 
 		this.shadow = source.shadow.clone();
+		this.shadowEx = source.shadowEx.clone();
 
 		return this;
 

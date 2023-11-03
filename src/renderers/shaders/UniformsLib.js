@@ -96,11 +96,15 @@ THREE.UniformsLib = {
 			"shadow": {},
 			"shadowBias": {},
 			"shadowRadius": {},
-			"shadowMapSize": {}
+			"shadowMapSize": {},
+			"shadowExMapSize": {},
+			"shadowEx": {},
 		} },
 
 		"directionalShadowMap": { value: [] },
 		"directionalShadowMatrix": { value: [] },
+		"directionalExShadowMap": { value: [] },
+		"directionalExShadowMatrix": { value: [] },
 
 		"spotLights": { value: [], properties: {
 			"color": {},

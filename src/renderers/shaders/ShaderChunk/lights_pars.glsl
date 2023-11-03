@@ -24,6 +24,8 @@ vec3 getAmbientLightIrradiance( const in vec3 ambientLightColor ) {
 		float shadowBias;
 		float shadowRadius;
 		vec2 shadowMapSize;
+		vec2 shadowExMapSize;
+		int shadowEx;
 	};
 
 	uniform DirectionalLight directionalLights[ NUM_DIR_LIGHTS ];

@@ -128,6 +128,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 	// camera matrices cache
 
 	_projScreenMatrix = new THREE.Matrix4(),
+	_identityMatrix = new THREE.Matrix4(),
 
 	_vector3 = new THREE.Vector3(),
 
@@ -141,6 +142,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 		directional: [],
 		directionalShadowMap: [],
 		directionalShadowMatrix: [],
+		directionalExShadowMap: [],
+		directionalExShadowMatrix: [],
 		spot: [],
 		spotShadowMap: [],
 		spotShadowMatrix: [],
@@ -1092,6 +1095,28 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	// Rendering
 
+	this.renderShadowsOnly = function ( scene, camera ) {
+
+		lights.length = 0;
+		setupShadows( lights );
+
+		shadowMap.render( scene, camera );
+
+		setupLights( lights, camera );
+
+	}
+
+	this.renderShadowsIntoMap = function ( scene, camera, light, shadow ) {
+
+		lights.length = 0;
+		setupShadows( lights );
+
+		shadowMap.renderIntoMap( scene, camera, light, shadow );
+
+		setupLights( lights, camera );
+
+	}
+
 	this.render = function ( scene, camera, renderTarget, forceClear ) {
 
 		if ( camera instanceof THREE.Camera === false ) {
@@ -1631,6 +1656,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			uniforms.directionalShadowMap.value = _lights.directionalShadowMap;
 			uniforms.directionalShadowMatrix.value = _lights.directionalShadowMatrix;
+			uniforms.directionalExShadowMap.value = _lights.directionalExShadowMap;
+			uniforms.directionalExShadowMatrix.value = _lights.directionalExShadowMatrix;
 			uniforms.spotShadowMap.value = _lights.spotShadowMap;
 			uniforms.spotShadowMatrix.value = _lights.spotShadowMatrix;
 			uniforms.pointShadowMap.value = _lights.pointShadowMap;
@@ -2322,11 +2349,16 @@ THREE.WebGLRenderer = function ( parameters ) {
 					uniforms.shadowBias = light.shadow.bias;
 					uniforms.shadowRadius = light.shadow.radius;
 					uniforms.shadowMapSize = light.shadow.mapSize;
+					uniforms.shadowExMapSize = light.shadowEx.mapSize;	
+					uniforms.shadowEx = Boolean( light.shadowEx && light.shadowEx.map );
 
 				}
 
 				_lights.directionalShadowMap[ directionalLength ] = shadowMap;
 				_lights.directionalShadowMatrix[ directionalLength ] = light.shadow.matrix;
+				var shadowMapB = ( light.shadowEx && light.shadowEx.map ) ? light.shadowEx.map.texture : null;
+				_lights.directionalExShadowMap[ directionalLength ] = shadowMapB;
+				_lights.directionalExShadowMatrix[ directionalLength ] = light.shadowEx.matrix;	
 				_lights.directional[ directionalLength ++ ] = uniforms;
 
 			} else if ( light instanceof THREE.SpotLight ) {
@@ -2387,7 +2419,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 				if ( _lights.pointShadowMatrix[ pointLength ] === undefined ) {
 
-					_lights.pointShadowMatrix[ pointLength ] = new THREE.Matrix4();
+					_lights.pointShadowMatrix[ pointLength ] = _identityMatrix;
 
 				}
 

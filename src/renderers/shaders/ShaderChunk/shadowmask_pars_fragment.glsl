@@ -11,8 +11,18 @@ float getShadowMask() {
 	for ( int i = 0; i < NUM_DIR_LIGHTS; i ++ ) {
 
 		directionalLight = directionalLights[ i ];
-		shadow *= bool( directionalLight.shadow ) ? getShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, directionalLight.shadowBias, directionalLight.shadowRadius, vDirectionalShadowCoord[ i ] ) : 1.0;
+		bool isEx = bool( directionalLight.shadowEx );
 
+		if (isEx) {
+
+			shadow *= bool( directionalLight.shadow ) ? getDirShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, vDirectionalShadowCoord[ i ], directionalExShadowMap[ i ], directionalLight.shadowExMapSize,vDirectionalExShadowCoord[ i ], directionalLight.shadowBias, directionalLight.shadowRadius ) : 1.0;
+
+		} else {
+
+			shadow *= bool( directionalLight.shadow ) ? getShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, directionalLight.shadowBias, directionalLight.shadowRadius, vDirectionalShadowCoord[ i ] ) : 1.0;
+
+		}
+            
 	}
 
 	#endif
