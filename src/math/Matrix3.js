@@ -268,9 +268,27 @@ THREE.Matrix3.prototype = {
 
 	},
 
-	fromArray: function ( array ) {
+	fromArray: function ( array, offset ) {
 
-		this.elements.set( array );
+		if ( offset === undefined ) {
+
+			this.elements.set(array);
+
+		} else {
+
+			var te = this.elements;
+
+			te[ 0 ] = array[ offset + 0 ];
+			te[ 1 ] = array[ offset + 1 ];
+			te[ 2 ] = array[ offset + 2 ];
+			te[ 3 ] = array[ offset + 3 ];
+			te[ 4 ] = array[ offset + 4 ];
+			te[ 5 ] = array[ offset + 5 ];
+			te[ 6 ] = array[ offset + 6 ];
+			te[ 7 ] = array[ offset + 7 ];
+			te[ 8 ] = array[ offset + 8 ];
+
+		}
 
 		return this;
 

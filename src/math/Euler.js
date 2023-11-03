@@ -272,12 +272,15 @@ THREE.Euler.prototype = {
 
 	},
 
-	fromArray: function ( array ) {
+	fromArray: function ( array, offset ) {
 
-		this._x = array[ 0 ];
-		this._y = array[ 1 ];
-		this._z = array[ 2 ];
-		if ( array[ 3 ] !== undefined ) this._order = array[ 3 ];
+		if ( offset === undefined ) offset = 0;
+
+		this._x = array[ offset + 0 ];
+		this._y = array[ offset + 1 ];
+		this._z = array[ offset + 2 ];
+
+		if ( array[ offset + 3 ] !== undefined ) this._order = array[ offset + 3 ];
 
 		this.onChangeCallback();
 

@@ -929,9 +929,34 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	fromArray: function ( array ) {
+	fromArray: function ( array, offset ) {
 
-		this.elements.set( array );
+		if ( offset === undefined ) {
+
+			this.elements.set(array);
+
+		} else {
+
+			var te = this.elements;
+
+			te[ 0 ] = array[ offset + 0 ];
+			te[ 1 ] = array[ offset + 1 ];
+			te[ 2 ] = array[ offset + 2 ];
+			te[ 3 ] = array[ offset + 3 ];
+			te[ 4 ] = array[ offset + 4 ];
+			te[ 5 ] = array[ offset + 5 ];
+			te[ 6 ] = array[ offset + 6 ];
+			te[ 7 ] = array[ offset + 7 ];
+			te[ 8 ] = array[ offset + 8 ];
+			te[ 9 ] = array[ offset + 9 ];
+			te[ 10 ] = array[ offset + 10 ];
+			te[ 11 ] = array[ offset + 11 ];
+			te[ 12 ] = array[ offset + 12 ];
+			te[ 13 ] = array[ offset + 13 ];
+			te[ 14 ] = array[ offset + 14 ];
+			te[ 15 ] = array[ offset + 15 ];
+
+		}
 
 		return this;
 
