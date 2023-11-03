@@ -52,6 +52,7 @@ THREE.Material = function () {
 
 	this.visible = true;
 
+	this.visibleInDepthPass = true;
 	this._needsUpdate = true;
 
 };
