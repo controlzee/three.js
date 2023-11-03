@@ -1453,8 +1453,18 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			var object = renderItem.object;
 			var geometry = renderItem.geometry;
-			var material = overrideMaterial === undefined ? renderItem.material : overrideMaterial;
 			var group = renderItem.group;
+			var material;
+			
+			if ( overrideMaterial !== undefined ) {
+				if ( renderItem.object.overrideMaterial !== null ) {
+					material = renderItem.object.overrideMaterial;					
+				} else {
+					material = overrideMaterial;
+				}
+			} else {
+				material = renderItem.material;
+			}
 
 			object.modelViewMatrix.multiplyMatrices( camera.matrixWorldInverse, object.matrixWorld );
 			object.normalMatrix.getNormalMatrix( object.modelViewMatrix );

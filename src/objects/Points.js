@@ -11,6 +11,8 @@ THREE.Points = function ( geometry, material ) {
 	this.geometry = geometry !== undefined ? geometry : new THREE.BufferGeometry();
 	this.material = material !== undefined ? material : new THREE.PointsMaterial( { color: Math.random() * 0xffffff } );
 
+	this.overrideMaterial = null;
+
 	this.ignoreRaycasts = false;
 };
 

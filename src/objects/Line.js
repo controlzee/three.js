@@ -17,7 +17,7 @@ THREE.Line = function ( geometry, material, mode ) {
 
 	this.geometry = geometry !== undefined ? geometry : new THREE.BufferGeometry();
 	this.material = material !== undefined ? material : new THREE.LineBasicMaterial( { color: Math.random() * 0xffffff } );
-
+	this.overrideMaterial = null;
 };
 
 THREE.Line.prototype = Object.assign( Object.create( THREE.Object3D.prototype ), {

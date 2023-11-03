@@ -13,6 +13,7 @@ THREE.Mesh = function ( geometry, material ) {
 
 	this.geometry = geometry !== undefined ? geometry : new THREE.BufferGeometry();
 	this.material = material !== undefined ? material : new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff } );
+	this.overrideMaterial = null;
 
 	this.drawMode = THREE.TrianglesDrawMode;
 
