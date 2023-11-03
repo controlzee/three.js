@@ -42,6 +42,7 @@
 	function intersectObject( object, raycaster, intersects, recursive ) {
 
 		if ( object.visible === false ) return;
+		if ( object.ignoreRaycasts === true ) return;
 
 		object.raycast( raycaster, intersects );
 

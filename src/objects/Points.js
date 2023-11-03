@@ -11,6 +11,7 @@ THREE.Points = function ( geometry, material ) {
 	this.geometry = geometry !== undefined ? geometry : new THREE.BufferGeometry();
 	this.material = material !== undefined ? material : new THREE.PointsMaterial( { color: Math.random() * 0xffffff } );
 
+	this.ignoreRaycasts = false;
 };
 
 THREE.Points.prototype = Object.assign( Object.create( THREE.Object3D.prototype ), {
