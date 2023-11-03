@@ -151,6 +151,20 @@ THREE.ShaderLib = {
 
 	},
 
+	'depth_clipspace': {
+
+		uniforms: THREE.UniformsUtils.merge( [
+
+			THREE.UniformsLib[ 'common' ],
+			THREE.UniformsLib[ 'displacementmap' ]
+
+		] ),
+
+		vertexShader: THREE.ShaderChunk[ 'depth_vert' ],
+		fragmentShader: THREE.ShaderChunk[ 'depth_frag_clipspace' ]
+
+	},
+
 	'normal': {
 
 		uniforms: {
@@ -206,6 +220,20 @@ THREE.ShaderLib = {
 
 		vertexShader: THREE.ShaderChunk[ 'distanceRGBA_vert' ],
 		fragmentShader: THREE.ShaderChunk[ 'distanceRGBA_frag' ]
+
+	},
+
+	'distanceRGBAVariableDist': {
+
+		uniforms: {
+
+			"lightPos": { value: new THREE.Vector3() },
+			"normDist": { value: 1000.0 }
+
+		},
+
+		vertexShader: THREE.ShaderChunk[ 'distanceRGBA_vert' ],
+		fragmentShader: THREE.ShaderChunk[ 'distanceRGBA_frag_variable_dist' ]
 
 	}
 
