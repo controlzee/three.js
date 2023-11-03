@@ -5,7 +5,7 @@
 
 	#ifdef BONE_TEXTURE
 
-		uniform sampler2D boneTexture;
+		uniform highp sampler2D boneTexture;
 		uniform int boneTextureWidth;
 		uniform int boneTextureHeight;
 
