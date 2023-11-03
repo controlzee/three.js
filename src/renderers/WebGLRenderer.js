@@ -790,10 +790,20 @@ THREE.WebGLRenderer = function ( parameters ) {
 		var groupStart = group !== null ? group.start : 0;
 		var groupCount = group !== null ? group.count : Infinity;
 
-		var drawStart = Math.max( dataStart, rangeStart, groupStart );
-		var drawEnd = Math.min( dataStart + dataCount, rangeStart + rangeCount, groupStart + groupCount ) - 1;
+		var objectRangeStart = 0;
+		var objectRangeCount = Infinity;
+
+		if ( object.drawRange !== undefined ) {
+			objectRangeStart = object.drawRange.start;
+			objectRangeCount = object.drawRange.count;
+		}
+
+		var drawStart = Math.max( dataStart, rangeStart, groupStart, objectRangeStart );
+		var drawEnd = Math.min( dataStart + dataCount, rangeStart + rangeCount, groupStart + groupCount, objectRangeStart + objectRangeCount ) - 1;
 
 		var drawCount = Math.max( 0, drawEnd - drawStart + 1 );
+
+		if ( drawCount === 0 ) return;
 
 		//
 

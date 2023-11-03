@@ -17,6 +17,8 @@ THREE.Mesh = function ( geometry, material ) {
 
 	this.drawMode = THREE.TrianglesDrawMode;
 
+	this.drawRange = { start: 0, count: Infinity };
+
 	this.ignoreRaycasts = false;
 
 	this.updateMorphTargets();
