@@ -156,6 +156,15 @@ THREE.WebGLProgram = ( function () {
 
 			}
 
+			replace =
+				'\n/* ================================ ' +
+				include +
+				' begin ================================ */ \n ' +
+				replace +
+				' \n /* ================================ ' +
+				include +
+				' end ================================ */ \n';
+
 			return parseIncludes( replace );
 
 		}
