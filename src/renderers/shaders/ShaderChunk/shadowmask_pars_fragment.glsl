@@ -15,11 +15,30 @@ float getShadowMask() {
 
 		if (isEx) {
 
-			shadow *= bool( directionalLight.shadow ) ? getDirShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, vDirectionalShadowCoord[ i ], directionalExShadowMap[ i ], directionalLight.shadowExMapSize,vDirectionalExShadowCoord[ i ], directionalLight.shadowBias, directionalLight.shadowRadius ) : 1.0;
+			shadow *= bool( directionalLight.shadow )
+				? getDirShadow(
+						directionalShadowMap[ i ],
+						directionalLight.shadowMapSize,
+						vDirectionalShadowCoord[ i ],
+						directionalExShadowMap[ i ],
+						directionalLight.shadowExMapSize,
+						vDirectionalExShadowCoord[ i ],
+						directionalLight.shadowBias,
+						directionalLight.shadowRadius
+					)
+				: 1.0;
 
 		} else {
 
-			shadow *= bool( directionalLight.shadow ) ? getShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, directionalLight.shadowBias, directionalLight.shadowRadius, vDirectionalShadowCoord[ i ] ) : 1.0;
+			shadow *= bool( directionalLight.shadow )
+				? getShadow(
+						directionalShadowMap[ i ],
+						directionalLight.shadowMapSize,
+						directionalLight.shadowBias,
+						directionalLight.shadowRadius,
+						vDirectionalShadowCoord[ i ]
+					)
+				: 1.0;
 
 		}
             
