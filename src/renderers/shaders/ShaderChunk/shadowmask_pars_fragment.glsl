@@ -13,8 +13,7 @@ float getShadowMask() {
 		directionalLight = directionalLights[ i ];
 		bool isEx = bool( directionalLight.shadowEx );
 
-		if (isEx) {
-
+		if (isEx)
 			shadow *= bool( directionalLight.shadow )
 				? getDirShadow(
 						directionalShadowMap[ i ],
@@ -27,9 +26,7 @@ float getShadowMask() {
 						directionalLight.shadowRadius
 					)
 				: 1.0;
-
-		} else {
-
+		else
 			shadow *= bool( directionalLight.shadow )
 				? getShadow(
 						directionalShadowMap[ i ],
@@ -40,8 +37,6 @@ float getShadowMask() {
 					)
 				: 1.0;
 
-		}
-            
 	}
 
 	#endif

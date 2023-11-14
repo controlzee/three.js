@@ -73,15 +73,13 @@ IncidentLight directLight;
 
 		#ifdef USE_SHADOWMAP
 
-			if ( directionalLight.shadowEx ) {
+			if ( directionalLight.shadowEx )
 
 				directLight.color *= all( bvec2( directionalLight.shadow, directLight.visible ) ) ? getShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, directionalLight.shadowBias, directionalLight.shadowRadius, vDirectionalShadowCoord[ i ] ) : 1.0;
 
-			} else {
+			else
 
 				directLight.color *= all( bvec2( directionalLight.shadow, directLight.visible ) ) ? getDirShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, vDirectionalShadowCoord[ i ], directionalExShadowMap[ i ], directionalLight.shadowExMapSize,vDirectionalExShadowCoord[ i ], directionalLight.shadowBias, directionalLight.shadowRadius ) : 1.0;
-				
-			}
 
 		#endif
 
