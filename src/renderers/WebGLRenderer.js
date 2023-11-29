@@ -144,6 +144,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 		directionalShadowMatrix: [],
 		directionalExShadowMap: [],
 		directionalExShadowMatrix: [],
+		directionalHeShadowMap: [],
+		directionalHeShadowMatrix: [],
 		spot: [],
 		spotShadowMap: [],
 		spotShadowMatrix: [],
@@ -2351,7 +2353,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 					uniforms.shadowMapSize = light.shadow.mapSize;
 					uniforms.shadowExMapSize = light.shadowEx.mapSize;	
 					uniforms.shadowEx = Boolean( light.shadowEx && light.shadowEx.map );
-
+					uniforms.shadowHeMapSize = light.shadowHe.mapSize;	
+					uniforms.shadowHe = Boolean( light.shadowHe && light.shadowHe.map );
 				}
 
 				_lights.directionalShadowMap[ directionalLength ] = shadowMap;
@@ -2359,6 +2362,9 @@ THREE.WebGLRenderer = function ( parameters ) {
 				var shadowMapB = ( light.shadowEx && light.shadowEx.map ) ? light.shadowEx.map.texture : null;
 				_lights.directionalExShadowMap[ directionalLength ] = shadowMapB;
 				_lights.directionalExShadowMatrix[ directionalLength ] = light.shadowEx.matrix;	
+				var shadowMapC = ( light.shadowHe && light.shadowHe.map ) ? light.shadowHe.map.texture : null;
+				_lights.directionalHeShadowMap[ directionalLength ] = shadowMapC;
+				_lights.directionalHeShadowMatrix[ directionalLength ] = light.shadowHe.matrix;
 				_lights.directional[ directionalLength ++ ] = uniforms;
 
 			} else if ( light instanceof THREE.SpotLight ) {

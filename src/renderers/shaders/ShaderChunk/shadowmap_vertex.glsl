@@ -6,6 +6,7 @@
 
 		vDirectionalShadowCoord[ i ] = directionalShadowMatrix[ i ] * worldPosition;
 		vDirectionalExShadowCoord[ i ] = directionalExShadowMatrix[ i ] * worldPosition;
+		vDirectionalHeShadowCoord[ i ] = directionalHeShadowMatrix[ i ] * worldPosition;
 
 	}
 

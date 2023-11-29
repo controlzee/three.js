@@ -28,7 +28,9 @@ THREE.WebGLLights = function () {
 					shadowRadius: 1,
 					shadowMapSize: new THREE.Vector2(),
 					shadowExMapSize: new THREE.Vector2(),
-					shadowEx: false
+					shadowEx: false,
+					shadowHeMapSize: new THREE.Vector2(),
+					shadowHe: false
 				};
 				break;
 

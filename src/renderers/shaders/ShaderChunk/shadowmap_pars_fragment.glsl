@@ -6,6 +6,8 @@
 		varying vec4 vDirectionalShadowCoord[ NUM_DIR_LIGHTS ];
 		uniform sampler2D directionalExShadowMap[ NUM_DIR_LIGHTS ];
 		varying vec4 vDirectionalExShadowCoord[ NUM_DIR_LIGHTS ];
+		uniform sampler2D directionalHeShadowMap[ NUM_DIR_LIGHTS ];
+		varying vec4 vDirectionalHeShadowCoord[ NUM_DIR_LIGHTS ];
 
 	#endif
 

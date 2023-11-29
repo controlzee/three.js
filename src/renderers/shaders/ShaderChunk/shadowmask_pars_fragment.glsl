@@ -11,32 +11,20 @@ float getShadowMask() {
 	for ( int i = 0; i < NUM_DIR_LIGHTS; i ++ ) {
 
 		directionalLight = directionalLights[ i ];
+
+		if ( !bool( directionalLight.shadow ) )
+			continue;
+
 		bool isEx = bool( directionalLight.shadowEx );
-
-		if (isEx)
-			shadow *= bool( directionalLight.shadow )
-				? getDirShadow(
-						directionalShadowMap[ i ],
-						directionalLight.shadowMapSize,
-						vDirectionalShadowCoord[ i ],
-						directionalExShadowMap[ i ],
-						directionalLight.shadowExMapSize,
-						vDirectionalExShadowCoord[ i ],
-						directionalLight.shadowBias,
-						directionalLight.shadowRadius
-					)
-				: 1.0;
+		if ( isEx )
+			shadow *= getDirShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, vDirectionalShadowCoord[ i ], directionalExShadowMap[ i ], directionalLight.shadowExMapSize, vDirectionalExShadowCoord[ i ], directionalLight.shadowBias, directionalLight.shadowRadius );
 		else
-			shadow *= bool( directionalLight.shadow )
-				? getShadow(
-						directionalShadowMap[ i ],
-						directionalLight.shadowMapSize,
-						directionalLight.shadowBias,
-						directionalLight.shadowRadius,
-						vDirectionalShadowCoord[ i ]
-					)
-				: 1.0;
+			shadow *= getShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, directionalLight.shadowBias, directionalLight.shadowRadius, vDirectionalShadowCoord[ i ] );
 
+		bool isHe = bool( directionalLight.shadowHe );
+		if ( isHe )
+			shadow *= getShadow( directionalHeShadowMap[ i ], directionalLight.shadowHeMapSize, directionalLight.shadowBias / 2.0, directionalLight.shadowRadius, vDirectionalHeShadowCoord[ i ] );
+            
 	}
 
 	#endif
