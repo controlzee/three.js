@@ -84,7 +84,6 @@ THREE.WebGLUniforms = ( function() { // scope
 	// Flattening for arrays of vectors and matrices
 
 		flatten = function( array, nBlocks, blockSize ) {
-			if ( array.length === 0 ) return array;
 
 			var firstElem = array[ 0 ];
 
