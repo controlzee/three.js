@@ -214,6 +214,7 @@
 	"src/renderers/shaders/ShaderLib/depth_frag.glsl",
 	"src/renderers/shaders/ShaderLib/depth_vert.glsl",
 	"src/renderers/shaders/ShaderLib/distanceRGBA_frag.glsl",
+	"src/renderers/shaders/ShaderLib/distanceRGBA_frag_variable_dist.glsl",
 	"src/renderers/shaders/ShaderLib/distanceRGBA_vert.glsl",
 	"src/renderers/shaders/ShaderLib/equirect_frag.glsl",
 	"src/renderers/shaders/ShaderLib/equirect_vert.glsl",
