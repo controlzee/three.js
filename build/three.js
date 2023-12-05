@@ -24008,6 +24008,10 @@ THREE.ShaderChunk[ 'cube_uv_reflection_fragment' ] ="#ifdef ENVMAP_TYPE_CUBE_UV\
 
 THREE.ShaderChunk[ 'defaultnormal_vertex' ] ="#ifdef FLIP_SIDED\n\n\tobjectNormal = -objectNormal;\n\n#endif\n\nvec3 transformedNormal = normalMatrix * objectNormal;\n";
 
+// File:src/renderers/shaders/ShaderChunk/depth_frag_clipspace.glsl
+
+THREE.ShaderChunk[ 'depth_frag_clipspace' ] ="#if (defined(DEPTH_PACKING) && DEPTH_PACKING == 3200)\n\tuniform float opacity;\n#endif\n#include <common>\n#include <packing>\n#include <uv_pars_fragment>\n#include <map_pars_fragment>\n#include <alphamap_pars_fragment>\n#include <logdepthbuf_pars_fragment>\n#include <clipping_planes_pars_fragment>\nvoid main() {\n\t#include <clipping_planes_fragment>\n\tvec4 diffuseColor = vec4( 1.0 );\n#if (defined(DEPTH_PACKING) && DEPTH_PACKING == 3200)\n\t\tdiffuseColor.a = opacity;\n\t#endif\n\t#include <map_fragment>\n\t#include <alphamap_fragment>\n\t#include <alphatest_fragment>\n\t#include <logdepthbuf_fragment>\n#if (defined(DEPTH_PACKING) && DEPTH_PACKING == 3200)\n\t\tgl_FragColor = vec4( vec3( gl_FragCoord.z / gl_FragCoord.w ), opacity );\n#elif (defined(DEPTH_PACKING) && DEPTH_PACKING == 3201)\n\t\tgl_FragColor = packDepthToRGBA( gl_FragCoord.z / gl_FragCoord.w );\n\t#endif\n}\n";
+
 // File:src/renderers/shaders/ShaderChunk/displacementmap_vertex.glsl
 
 THREE.ShaderChunk[ 'displacementmap_vertex' ] ="#ifdef USE_DISPLACEMENTMAP\n\n\ttransformed += normal * ( texture2D( displacementMap, uv ).x * displacementScale + displacementBias );\n\n#endif\n";
@@ -24015,6 +24019,10 @@ THREE.ShaderChunk[ 'displacementmap_vertex' ] ="#ifdef USE_DISPLACEMENTMAP\n\n\t
 // File:src/renderers/shaders/ShaderChunk/displacementmap_pars_vertex.glsl
 
 THREE.ShaderChunk[ 'displacementmap_pars_vertex' ] ="#ifdef USE_DISPLACEMENTMAP\n\n\tuniform sampler2D displacementMap;\n\tuniform float displacementScale;\n\tuniform float displacementBias;\n\n#endif\n";
+
+// File:src/renderers/shaders/ShaderChunk/distanceRGBA_frag_variable_dist.glsl
+
+THREE.ShaderChunk[ 'distanceRGBA_frag_variable_dist' ] ="uniform float normDist; uniform vec3 lightPos;\nvarying vec4 vWorldPosition;\n#include <common>\n#include <packing>\n#include <clipping_planes_pars_fragment>\nvoid main () {\n\t#include <clipping_planes_fragment>\n\tgl_FragColor = packDepthToRGBA( length( vWorldPosition.xyz - lightPos.xyz ) / normDist );\n}\n";
 
 // File:src/renderers/shaders/ShaderChunk/emissivemap_fragment.glsl
 
@@ -24190,7 +24198,7 @@ THREE.ShaderChunk[ 'shadowmap_vertex' ] ="#ifdef USE_SHADOWMAP\n\n\t#if NUM_DIR_
 
 // File:src/renderers/shaders/ShaderChunk/shadowmask_pars_fragment.glsl
 
-THREE.ShaderChunk[ 'shadowmask_pars_fragment' ] ="float getShadowMask() {\n\n\tfloat shadow = 1.0;\n\n\t#ifdef USE_SHADOWMAP\n\n\t#if NUM_DIR_LIGHTS > 0\n\n\tDirectionalLight directionalLight;\n\n\tfor ( int i = 0; i < NUM_DIR_LIGHTS; i ++ ) {\n\n\t\tdirectionalLight = directionalLights[ i ];\n\n\t\tif ( !bool( directionalLight.shadow ) )\n\t\t\tcontinue;\n\n\t\tbool isEx = bool( directionalLight.shadowEx );\n\t\tif ( isEx )\n\t\t\tshadow *= getDirShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, vDirectionalShadowCoord[ i ], directionalExShadowMap[ i ], directionalLight.shadowExMapSize, vDirectionalExShadowCoord[ i ], directionalLight.shadowBias, directionalLight.shadowRadius );\n\t\telse\n\t\t\tshadow *= getShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, directionalLight.shadowBias, directionalLight.shadowRadius, vDirectionalShadowCoord[ i ] );\n\n\t\tbool isHe = bool( directionalLight.shadowHe );\n\t\tif ( isHe )\n\t\t\tshadow *= getShadow( directionalHeShadowMap[ i ], directionalLight.shadowHeMapSize, directionalLight.shadowBias / 2.0, directionalLight.shadowRadius, vDirectionalHeShadowCoord[ i ] );\n            \n\t}\n\n\t#endif\n\n\t#if NUM_SPOT_LIGHTS > 0\n\n\tSpotLight spotLight;\n\n\tfor ( int i = 0; i < NUM_SPOT_LIGHTS; i ++ ) {\n\n\t\tspotLight = spotLights[ i ];\n\t\tshadow *= bool( spotLight.shadow ) ? getShadow( spotShadowMap[ i ], spotLight.shadowMapSize, spotLight.shadowBias, spotLight.shadowRadius, vSpotShadowCoord[ i ] ) : 1.0;\n\n\t}\n\n\t#endif\n\n\t#if NUM_POINT_LIGHTS > 0\n\n\tPointLight pointLight;\n\n\tfor ( int i = 0; i < NUM_POINT_LIGHTS; i ++ ) {\n\n\t\tpointLight = pointLights[ i ];\n\t\tshadow *= bool( pointLight.shadow ) ? getPointShadow( pointShadowMap[ i ], pointLight.shadowMapSize, pointLight.shadowBias, pointLight.shadowRadius, vPointShadowCoord[ i ] ) : 1.0;\n\n\t}\n\n\t#endif\n\n\t#endif\n\n\treturn shadow;\n\n}\n";
+THREE.ShaderChunk[ 'shadowmask_pars_fragment' ] ="float getShadowMask() {\n\n\tfloat shadow = 1.0;\n\n\t#ifdef USE_SHADOWMAP\n\n\t#if NUM_DIR_LIGHTS > 0\n\n\tDirectionalLight directionalLight;\n\n\tfor ( int i = 0; i < NUM_DIR_LIGHTS; i ++ ) {\n\n\t\tdirectionalLight = directionalLights[ i ];\n\n\t\tif ( !bool( directionalLight.shadow ) ) {\n\n\t\t\tbool isEx = bool( directionalLight.shadowEx );\n\t\t\tif ( isEx )\n\t\t\t\tshadow *= getDirShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, vDirectionalShadowCoord[ i ], directionalExShadowMap[ i ], directionalLight.shadowExMapSize, vDirectionalExShadowCoord[ i ], directionalLight.shadowBias, directionalLight.shadowRadius );\n\t\t\telse\n\t\t\t\tshadow *= getShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, directionalLight.shadowBias, directionalLight.shadowRadius, vDirectionalShadowCoord[ i ] );\n\n\t\t\tbool isHe = bool( directionalLight.shadowHe );\n\t\t\tif ( isHe )\n\t\t\t\tshadow *= getShadow( directionalHeShadowMap[ i ], directionalLight.shadowHeMapSize, directionalLight.shadowBias / 2.0, directionalLight.shadowRadius, vDirectionalHeShadowCoord[ i ] );\n\n\t\t}\n \n\t}\n\n\t#endif\n\n\t#if NUM_SPOT_LIGHTS > 0\n\n\tSpotLight spotLight;\n\n\tfor ( int i = 0; i < NUM_SPOT_LIGHTS; i ++ ) {\n\n\t\tspotLight = spotLights[ i ];\n\t\tshadow *= bool( spotLight.shadow ) ? getShadow( spotShadowMap[ i ], spotLight.shadowMapSize, spotLight.shadowBias, spotLight.shadowRadius, vSpotShadowCoord[ i ] ) : 1.0;\n\n\t}\n\n\t#endif\n\n\t#if NUM_POINT_LIGHTS > 0\n\n\tPointLight pointLight;\n\n\tfor ( int i = 0; i < NUM_POINT_LIGHTS; i ++ ) {\n\n\t\tpointLight = pointLights[ i ];\n\t\tshadow *= bool( pointLight.shadow ) ? getPointShadow( pointShadowMap[ i ], pointLight.shadowMapSize, pointLight.shadowBias, pointLight.shadowRadius, vPointShadowCoord[ i ] ) : 1.0;\n\n\t}\n\n\t#endif\n\n\t#endif\n\n\treturn shadow;\n\n}\n";
 
 // File:src/renderers/shaders/ShaderChunk/skinbase_vertex.glsl
 
@@ -24502,6 +24510,10 @@ THREE.ShaderChunk[ 'cube_vert' ] ="varying vec3 vWorldPosition;\n\n#include <com
 
 THREE.ShaderChunk[ 'depth_frag' ] ="#if (defined(DEPTH_PACKING) && DEPTH_PACKING == 3200)\n\n\tuniform float opacity;\n\n#endif\n\n#include <common>\n#include <packing>\n#include <uv_pars_fragment>\n#include <map_pars_fragment>\n#include <alphamap_pars_fragment>\n#include <logdepthbuf_pars_fragment>\n#include <clipping_planes_pars_fragment>\n\nvoid main() {\n\n\t#include <clipping_planes_fragment>\n\n\tvec4 diffuseColor = vec4( 1.0 );\n\n\t#if (defined(DEPTH_PACKING) && DEPTH_PACKING == 3200)\n\n\t\tdiffuseColor.a = opacity;\n\n\t#endif\n\n\t#include <map_fragment>\n\t#include <alphamap_fragment>\n\t#include <alphatest_fragment>\n\n\t#include <logdepthbuf_fragment>\n\n\t#if (defined(DEPTH_PACKING) && DEPTH_PACKING == 3200)\n\n\t\tgl_FragColor = vec4( vec3( gl_FragCoord.z ), opacity );\n\n\t#elif (defined(DEPTH_PACKING) && DEPTH_PACKING == 3201)\n\n\t\tgl_FragColor = packDepthToRGBA( gl_FragCoord.z );\n\n\t#endif\n\n}\n";
 
+// File:src/renderers/shaders/ShaderLib/depth_frag_clipspace.glsl
+
+THREE.ShaderChunk[ 'depth_frag_clipspace' ] ="#if (defined(DEPTH_PACKING) && DEPTH_PACKING == 3200)\n\n\tuniform float opacity;\n\n#endif\n\n#include <common>\n#include <packing>\n#include <uv_pars_fragment>\n#include <map_pars_fragment>\n#include <alphamap_pars_fragment>\n#include <logdepthbuf_pars_fragment>\n#include <clipping_planes_pars_fragment>\n\nvoid main() {\n\n\t#include <clipping_planes_fragment>\n\n\tvec4 diffuseColor = vec4( 1.0 );\n\n\t#if (defined(DEPTH_PACKING) && DEPTH_PACKING == 3200)\n\n\t\tdiffuseColor.a = opacity;\n\n\t#endif\n\n\t#include <map_fragment>\n\t#include <alphamap_fragment>\n\t#include <alphatest_fragment>\n\n\t#include <logdepthbuf_fragment>\n\n\t#if (defined(DEPTH_PACKING) && DEPTH_PACKING == 3200)\n\n\t\tgl_FragColor = vec4( vec3( gl_FragCoord.z / gl_FragCoord.w ), opacity );\n\n\t#elif (defined(DEPTH_PACKING) && DEPTH_PACKING == 3201)\n\n\t\tgl_FragColor = packDepthToRGBA( gl_FragCoord.z / gl_FragCoord.w );\n\n\t#endif\n\n}\n";
+
 // File:src/renderers/shaders/ShaderLib/depth_vert.glsl
 
 THREE.ShaderChunk[ 'depth_vert' ] ="#include <common>\n#include <uv_pars_vertex>\n#include <displacementmap_pars_vertex>\n#include <morphtarget_pars_vertex>\n#include <skinning_pars_vertex>\n#include <logdepthbuf_pars_vertex>\n#include <clipping_planes_pars_vertex>\n\nvoid main() {\n\n\t#include <uv_vertex>\n\n\t#include <skinbase_vertex>\n\n\t#include <begin_vertex>\n\t#include <displacementmap_vertex>\n\t#include <morphtarget_vertex>\n\t#include <skinning_vertex>\n\t#include <project_vertex>\n\t#include <logdepthbuf_vertex>\n\t#include <clipping_planes_vertex>\n\n}\n";
@@ -24509,6 +24521,10 @@ THREE.ShaderChunk[ 'depth_vert' ] ="#include <common>\n#include <uv_pars_vertex>
 // File:src/renderers/shaders/ShaderLib/distanceRGBA_frag.glsl
 
 THREE.ShaderChunk[ 'distanceRGBA_frag' ] ="uniform vec3 lightPos;\nvarying vec4 vWorldPosition;\n\n#include <common>\n#include <packing>\n#include <clipping_planes_pars_fragment>\n\nvoid main () {\n\n\t#include <clipping_planes_fragment>\n\n\tgl_FragColor = packDepthToRGBA( length( vWorldPosition.xyz - lightPos.xyz ) / 1000.0 );\n\n}\n";
+
+// File:src/renderers/shaders/ShaderLib/distanceRGBA_frag_variable_dist.glsl
+
+THREE.ShaderChunk[ 'distanceRGBA_frag_variable_dist' ] ="uniform float normDist; uniform vec3 lightPos;\nvarying vec4 vWorldPosition;\n\n#include <common>\n#include <packing>\n#include <clipping_planes_pars_fragment>\n\nvoid main () {\n\n\t#include <clipping_planes_fragment>\n\n\tgl_FragColor = packDepthToRGBA( length( vWorldPosition.xyz - lightPos.xyz ) / normDist );\n\n}\n";
 
 // File:src/renderers/shaders/ShaderLib/distanceRGBA_vert.glsl
 
