@@ -3,16 +3,23 @@ float getShadowMask() {
 	float shadow = 1.0;
 
 	#ifdef USE_SHADOWMAP
-
 	#if NUM_DIR_LIGHTS > 0
 
 	DirectionalLight directionalLight;
 
 	for ( int i = 0; i < NUM_DIR_LIGHTS; i ++ ) {
+			directionalLight = directionalLights[ i ];
+			if(bool(directionalLight.shadow)) {
+				bool isEx = bool( directionalLight.shadowEx );
+				if(isEx)
+					shadow *= getDirShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, vDirectionalShadowCoord[ i ], directionalExShadowMap[ i ], directionalLight.shadowExMapSize, vDirectionalExShadowCoord[ i ], directionalLight.shadowBias, directionalLight.shadowRadius );
+				else
+					shadow *= getShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, directionalLight.shadowBias, directionalLight.shadowRadius, vDirectionalShadowCoord[ i ] );
 
-		directionalLight = directionalLights[ i ];
-		shadow *= bool( directionalLight.shadow ) ? getShadow( directionalShadowMap[ i ], directionalLight.shadowMapSize, directionalLight.shadowBias, directionalLight.shadowRadius, vDirectionalShadowCoord[ i ] ) : 1.0;
-
+				bool isHe = bool( directionalLight.shadowHe );
+				if(isHe)
+					shadow *= getShadow( directionalHeShadowMap[ i ], directionalLight.shadowHeMapSize, directionalLight.shadowBias / 2.0, directionalLight.shadowRadius, vDirectionalHeShadowCoord[ i ] );
+			}
 	}
 
 	#endif
@@ -46,5 +53,4 @@ float getShadowMask() {
 	#endif
 
 	return shadow;
-
 }

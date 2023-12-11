@@ -8,6 +8,7 @@ THREE.ImmediateRenderObject = function ( material ) {
 
 	this.material = material;
 	this.render = function ( renderCallback ) {};
+	this.overrideMaterial = null;
 
 };
 

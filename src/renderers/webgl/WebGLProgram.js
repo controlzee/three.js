@@ -138,7 +138,8 @@ THREE.WebGLProgram = ( function () {
 			.replace( /NUM_DIR_LIGHTS/g, parameters.numDirLights )
 			.replace( /NUM_SPOT_LIGHTS/g, parameters.numSpotLights )
 			.replace( /NUM_POINT_LIGHTS/g, parameters.numPointLights )
-			.replace( /NUM_HEMI_LIGHTS/g, parameters.numHemiLights );
+			.replace( /NUM_HEMI_LIGHTS/g, parameters.numHemiLights )
+			.replace( /NUM_DIREX_LIGHTS/g, parameters.numDirExLights );
 
 	}
 
@@ -155,6 +156,15 @@ THREE.WebGLProgram = ( function () {
 				throw new Error( 'Can not resolve #include <' + include + '>' );
 
 			}
+
+			replace =
+				'\n/* ================================ ' +
+				include +
+				' begin ================================ */ \n ' +
+				replace +
+				' \n /* ================================ ' +
+				include +
+				' end ================================ */ \n';
 
 			return parseIncludes( replace );
 
@@ -195,6 +205,13 @@ THREE.WebGLProgram = ( function () {
 
 		var vertexShader = material.__webglShader.vertexShader;
 		var fragmentShader = material.__webglShader.fragmentShader;
+
+		var shadowMapIndex = 0;
+		if ( parameters.shadowMapIndex ) {
+
+			shadowMapIndex = parameters.shadowMapIndex;
+
+		}
 
 		var shadowMapTypeDefine = 'SHADOWMAP_TYPE_BASIC';
 
@@ -340,6 +357,7 @@ THREE.WebGLProgram = ( function () {
 
 				parameters.shadowMapEnabled ? '#define USE_SHADOWMAP' : '',
 				parameters.shadowMapEnabled ? '#define ' + shadowMapTypeDefine : '',
+				parameters.shadowMapEnabled ? '#define SHADOWMAP_IDX ' + shadowMapIndex : '',
 
 				parameters.sizeAttenuation ? '#define USE_SIZEATTENUATION' : '',
 

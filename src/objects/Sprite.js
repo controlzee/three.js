@@ -10,6 +10,7 @@ THREE.Sprite = function ( material ) {
 	this.type = 'Sprite';
 
 	this.material = ( material !== undefined ) ? material : new THREE.SpriteMaterial();
+	this.overrideMaterial = null;
 
 };
 

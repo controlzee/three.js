@@ -120,7 +120,7 @@ THREE.PropertyBinding.prototype = {
 					// support resolving morphTarget names into indices.
 					for ( var i = 0; i < targetObject.length; i ++ ) {
 
-						if ( targetObject[ i ].name === objectIndex ) {
+						if ( targetObject[ i ] && ( targetObject[ i ].name === objectIndex ) ) {
 
 							objectIndex = i;
 							break;

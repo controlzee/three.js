@@ -23,9 +23,9 @@ THREE.WebGLPrograms = function ( renderer, capabilities ) {
 		"flatShading", "sizeAttenuation", "logarithmicDepthBuffer", "skinning",
 		"maxBones", "useVertexTexture", "morphTargets", "morphNormals",
 		"maxMorphTargets", "maxMorphNormals", "premultipliedAlpha",
-		"numDirLights", "numPointLights", "numSpotLights", "numHemiLights",
+		"numDirLights", "numPointLights", "numSpotLights", "numHemiLights","numDirExLights",
 		"shadowMapEnabled", "shadowMapType", "toneMapping", 'physicallyCorrectLights',
-		"alphaTest", "doubleSided", "flipSided", "numClippingPlanes", "depthPacking"
+		"alphaTest", "doubleSided", "flipSided", "numClippingPlanes", "depthPacking", "shadowMapIndex" 
 	];
 
 

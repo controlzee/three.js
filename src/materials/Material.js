@@ -52,6 +52,8 @@ THREE.Material = function () {
 
 	this.visible = true;
 
+	this.overrideShadowDepthSide = null;
+	this.visibleInDepthPass = true;
 	this._needsUpdate = true;
 
 };

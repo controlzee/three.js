@@ -24,6 +24,10 @@ vec3 getAmbientLightIrradiance( const in vec3 ambientLightColor ) {
 		float shadowBias;
 		float shadowRadius;
 		vec2 shadowMapSize;
+		vec2 shadowExMapSize;
+		int shadowEx;
+		vec2 shadowHeMapSize;
+		int shadowHe;
 	};
 
 	uniform DirectionalLight directionalLights[ NUM_DIR_LIGHTS ];
@@ -50,7 +54,7 @@ vec3 getAmbientLightIrradiance( const in vec3 ambientLightColor ) {
 		int shadow;
 		float shadowBias;
 		float shadowRadius;
-		vec2 shadowMapSize;
+		tvec2 shadowMapSize;
 	};
 
 	uniform PointLight pointLights[ NUM_POINT_LIGHTS ];
@@ -187,12 +191,12 @@ vec3 getAmbientLightIrradiance( const in vec3 ambientLightColor ) {
 
 			#endif
 
-			envMapColor.rgb = envMapTexelToLinear( envMapColor ).rgb;
+		envMapColor.rgb = envMapTexelToLinear( envMapColor ).rgb;
 
 		#elif defined( ENVMAP_TYPE_CUBE_UV )
 
 			vec3 queryVec = flipNormal * vec3( flipEnvMap * worldNormal.x, worldNormal.yz );
-			vec4 envMapColor = textureCubeUV( queryVec, 1.0 );
+			vec4 envMapColor = textureCubeUV( queryVec, 1.0 );\
 
 		#else
 
