@@ -878,7 +878,39 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		} else {
 
-			renderer.render( drawStart, drawCount );
+			if(object.geometry && object.geometry.framedata) {
+				let mi = object.geometry.framedata.limbindices;
+				let fc = object.geometry.framedata.orderedcounts;
+				let timetick = Math.floor(new Date().getTime() * 0.0065);
+
+				let start = 0
+				meshnum = 0;
+				for(let i = 0; i < fc.length; i++) {
+					let frames = fc[i];
+					if(frames === 1) { // combine and draw single frame meashs
+						if( i === (fc.length - 1)  || fc[i+1] !== 1) {
+							let end = mi[meshnum];
+							renderer.render( start, end-start );
+							start = end;
+						}
+						meshnum++;
+					} else {
+						let f = (timetick % frames); // cycle frames
+						// loop over frames in an animated mesh and draw the right one
+						for(let j = 0; j < frames; j++) {
+							let end = mi[meshnum];
+							if(f === j) {
+								renderer.render( start, end-start );
+							}
+							start = end;
+							meshnum++;
+						}
+					}
+				}
+
+			} else {
+				renderer.render( drawStart, drawCount );
+			}
 
 		}
 
