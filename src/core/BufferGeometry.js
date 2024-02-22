@@ -24,6 +24,8 @@ THREE.BufferGeometry = function () {
 
 	this.drawRange = { start: 0, count: Infinity };
 
+	this.frameData = null;
+
 };
 
 Object.assign( THREE.BufferGeometry.prototype, THREE.EventDispatcher.prototype, {

@@ -878,8 +878,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		} else {
 
-			if(object.geometry && object.geometry.framedata) {
-				let fd = object.geometry.framedata;
+			if(object.geometry && object.geometry.frameData) {
+				let fd = object.geometry.frameData;
 				let mi = fd.limbindices;
 				let as = fd.animSequences;
 				let vf = fd.visibleframe;
