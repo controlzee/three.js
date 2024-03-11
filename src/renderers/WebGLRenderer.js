@@ -198,11 +198,11 @@ THREE.WebGLRenderer = function ( parameters ) {
 			preserveDrawingBuffer: _preserveDrawingBuffer
 		};
 
-		_gl = _context || _canvas.getContext( 'webgl', attributes ) || _canvas.getContext( 'experimental-webgl', attributes );
+		_gl = _context || _canvas.getContext( 'webgl2', attributes ) || _canvas.getContext( 'experimental-webgl', attributes );
 
 		if ( _gl === null ) {
 
-			if ( _canvas.getContext( 'webgl' ) !== null ) {
+			if ( _canvas.getContext( 'webgl2' ) !== null ) {
 
 				throw 'Error creating WebGL context with your selected attributes.';
 
@@ -249,6 +249,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 		THREE.BufferGeometry.MaxIndex = 4294967296;
 
 	}
+	THREE.BufferGeometry.MaxIndex = 4294967296;
 
 	var capabilities = new THREE.WebGLCapabilities( _gl, extensions, parameters );
 
@@ -2794,13 +2795,13 @@ THREE.WebGLRenderer = function ( parameters ) {
 		if ( p === THREE.UnsignedIntType ) return _gl.UNSIGNED_INT;
 		if ( p === THREE.FloatType ) return _gl.FLOAT;
 
-		extension = extensions.get( 'OES_texture_half_float' );
+		// extension = extensions.get( 'OES_texture_half_float' );
 
-		if ( extension !== null ) {
+		// if ( extension !== null ) {
 
 			if ( p === THREE.HalfFloatType ) return extension.HALF_FLOAT_OES;
 
-		}
+		// }
 
 		if ( p === THREE.AlphaFormat ) return _gl.ALPHA;
 		if ( p === THREE.RGBFormat ) return _gl.RGB;

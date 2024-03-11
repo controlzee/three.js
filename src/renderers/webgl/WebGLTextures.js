@@ -374,8 +374,8 @@ THREE.WebGLTextures = function ( _gl, extensions, state, properties, capabilitie
 
 		if ( extension ) {
 
-			if ( texture.type === THREE.FloatType && extensions.get( 'OES_texture_float_linear' ) === null ) return;
-			if ( texture.type === THREE.HalfFloatType && extensions.get( 'OES_texture_half_float_linear' ) === null ) return;
+			// if ( texture.type === THREE.FloatType && extensions.get( 'OES_texture_float_linear' ) === null ) return;
+			// if ( texture.type === THREE.HalfFloatType && extensions.get( 'OES_texture_half_float_linear' ) === null ) return;
 
 			if ( texture.anisotropy > 1 || properties.get( texture ).__currentAnisotropy ) {
 
@@ -447,6 +447,14 @@ THREE.WebGLTextures = function ( _gl, extensions, state, properties, capabilitie
 
 		} else if ( texture instanceof THREE.DataTexture ) {
 
+			// need to change this internal format for WebGL2 in onr of our data textures
+			let glChangedInternalFormat = glFormat;
+			if(_isWebGL2) {
+				if(texture.type === THREE.FloatType && glFormat === _gl.RGB) {
+					glChangedInternalFormat = _gl.RGB32F;
+				}
+			}
+
 			// use manually created mipmaps if available
 			// if there are no manual mipmaps
 			// set 0 level mipmap and then use GL to generate other mipmap levels
@@ -456,7 +464,7 @@ THREE.WebGLTextures = function ( _gl, extensions, state, properties, capabilitie
 				for ( var i = 0, il = mipmaps.length; i < il; i ++ ) {
 
 					mipmap = mipmaps[ i ];
-					state.texImage2D( _gl.TEXTURE_2D, i, glFormat, mipmap.width, mipmap.height, 0, glFormat, glType, mipmap.data );
+					state.texImage2D( _gl.TEXTURE_2D, i, glChangedInternalFormat, mipmap.width, mipmap.height, 0, glFormat, glType, mipmap.data );
 
 				}
 
@@ -464,7 +472,7 @@ THREE.WebGLTextures = function ( _gl, extensions, state, properties, capabilitie
 
 			} else {
 
-				state.texImage2D( _gl.TEXTURE_2D, 0, glFormat, image.width, image.height, 0, glFormat, glType, image.data );
+				state.texImage2D( _gl.TEXTURE_2D, 0, glChangedInternalFormat, image.width, image.height, 0, glFormat, glType, image.data );
 
 			}
 

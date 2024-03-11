@@ -25067,11 +25067,11 @@ THREE.WebGLRenderer = function ( parameters ) {
 			preserveDrawingBuffer: _preserveDrawingBuffer
 		};
 
-		_gl = _context || _canvas.getContext( 'webgl', attributes ) || _canvas.getContext( 'experimental-webgl', attributes );
+		_gl = _context || _canvas.getContext( 'webgl2', attributes ) || _canvas.getContext( 'experimental-webgl', attributes );
 
 		if ( _gl === null ) {
 
-			if ( _canvas.getContext( 'webgl' ) !== null ) {
+			if ( _canvas.getContext( 'webgl2' ) !== null ) {
 
 				throw 'Error creating WebGL context with your selected attributes.';
 
@@ -25118,6 +25118,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 		THREE.BufferGeometry.MaxIndex = 4294967296;
 
 	}
+	THREE.BufferGeometry.MaxIndex = 4294967296;
 
 	var capabilities = new THREE.WebGLCapabilities( _gl, extensions, parameters );
 
@@ -27663,13 +27664,13 @@ THREE.WebGLRenderer = function ( parameters ) {
 		if ( p === THREE.UnsignedIntType ) return _gl.UNSIGNED_INT;
 		if ( p === THREE.FloatType ) return _gl.FLOAT;
 
-		extension = extensions.get( 'OES_texture_half_float' );
+		// extension = extensions.get( 'OES_texture_half_float' );
 
-		if ( extension !== null ) {
+		// if ( extension !== null ) {
 
 			if ( p === THREE.HalfFloatType ) return extension.HALF_FLOAT_OES;
 
-		}
+		// }
 
 		if ( p === THREE.AlphaFormat ) return _gl.ALPHA;
 		if ( p === THREE.RGBFormat ) return _gl.RGB;
@@ -28086,7 +28087,7 @@ THREE.WebGLIndexedBufferRenderer = function ( _gl, extensions, _infoRender ) {
 
 	function setIndex( index ) {
 
-		if ( index.array instanceof Uint32Array && extensions.get( 'OES_element_index_uint' ) ) {
+		if ( index.array instanceof Uint32Array /* && extensions.get( 'OES_element_index_uint' ) */ ) {
 
 			type = _gl.UNSIGNED_INT;
 			size = 4;
@@ -28831,7 +28832,8 @@ THREE.WebGLProgram = ( function () {
 		extensions = extensions || {};
 
 		var chunks = [
-			( extensions.derivatives || parameters.envMapCubeUV || parameters.bumpMap || parameters.normalMap || parameters.flatShading ) ? '#extension GL_OES_standard_derivatives : enable' : '',
+			// ( extensions.derivatives || parameters.envMapCubeUV || parameters.bumpMap || parameters.normalMap || parameters.flatShading ) ? '#extension GL_OES_standard_derivatives : enable' : '',
+			// ( extensions.derivatives || parameters.envMapCubeUV || parameters.bumpMap || parameters.normalMap || parameters.flatShading ) ? '#version 300 es' : '',
 			( extensions.fragDepth || parameters.logarithmicDepthBuffer ) && rendererExtensions.get( 'EXT_frag_depth' ) ? '#extension GL_EXT_frag_depth : enable' : '',
 			( extensions.drawBuffers ) && rendererExtensions.get( 'WEBGL_draw_buffers' ) ? '#extension GL_EXT_draw_buffers : require' : '',
 			( extensions.shaderTextureLOD || parameters.envMap ) && rendererExtensions.get( 'EXT_shader_texture_lod' ) ? '#extension GL_EXT_shader_texture_lod : enable' : '',
@@ -31603,8 +31605,8 @@ THREE.WebGLTextures = function ( _gl, extensions, state, properties, capabilitie
 
 		if ( extension ) {
 
-			if ( texture.type === THREE.FloatType && extensions.get( 'OES_texture_float_linear' ) === null ) return;
-			if ( texture.type === THREE.HalfFloatType && extensions.get( 'OES_texture_half_float_linear' ) === null ) return;
+			// if ( texture.type === THREE.FloatType && extensions.get( 'OES_texture_float_linear' ) === null ) return;
+			// if ( texture.type === THREE.HalfFloatType && extensions.get( 'OES_texture_half_float_linear' ) === null ) return;
 
 			if ( texture.anisotropy > 1 || properties.get( texture ).__currentAnisotropy ) {
 
@@ -31676,6 +31678,14 @@ THREE.WebGLTextures = function ( _gl, extensions, state, properties, capabilitie
 
 		} else if ( texture instanceof THREE.DataTexture ) {
 
+			// need to change this internal format for WebGL2 in onr of our data textures
+			let glChangedInternalFormat = glFormat;
+			if(_isWebGL2) {
+				if(texture.type === THREE.FloatType && glFormat === _gl.RGB) {
+					glChangedInternalFormat = _gl.RGB32F;
+				}
+			}
+
 			// use manually created mipmaps if available
 			// if there are no manual mipmaps
 			// set 0 level mipmap and then use GL to generate other mipmap levels
@@ -31685,7 +31695,7 @@ THREE.WebGLTextures = function ( _gl, extensions, state, properties, capabilitie
 				for ( var i = 0, il = mipmaps.length; i < il; i ++ ) {
 
 					mipmap = mipmaps[ i ];
-					state.texImage2D( _gl.TEXTURE_2D, i, glFormat, mipmap.width, mipmap.height, 0, glFormat, glType, mipmap.data );
+					state.texImage2D( _gl.TEXTURE_2D, i, glChangedInternalFormat, mipmap.width, mipmap.height, 0, glFormat, glType, mipmap.data );
 
 				}
 
@@ -31693,7 +31703,7 @@ THREE.WebGLTextures = function ( _gl, extensions, state, properties, capabilitie
 
 			} else {
 
-				state.texImage2D( _gl.TEXTURE_2D, 0, glFormat, image.width, image.height, 0, glFormat, glType, image.data );
+				state.texImage2D( _gl.TEXTURE_2D, 0, glChangedInternalFormat, image.width, image.height, 0, glFormat, glType, image.data );
 
 			}
 

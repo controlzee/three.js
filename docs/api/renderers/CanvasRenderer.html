@@ -19,7 +19,7 @@
 				try {
 					var canvas = document.createElement( 'canvas' );
 					return !!( window.WebGLRenderingContext && (
-						canvas.getContext( 'webgl' ) ||
+						canvas.getContext( 'webgl2' ) ||
 						canvas.getContext( 'experimental-webgl' ) )
 					);
 				} catch ( e ) {
