@@ -42,16 +42,20 @@ THREE.WebGLIndexedBufferRenderer = function ( _gl, extensions, _infoRender ) {
 
 	function renderInstances( geometry, start, count ) {
 
-		var extension = extensions.get( 'ANGLE_instanced_arrays' );
+		/* var extension = extensions.get( 'ANGLE_instanced_arrays' );
 
 		if ( extension === null ) {
 
 			console.error( 'THREE.WebGLBufferRenderer: using THREE.InstancedBufferGeometry but hardware does not support extension ANGLE_instanced_arrays.' );
 			return;
 
-		}
+		} 
+        
+        extension.drawElementsInstancedANGLE( mode, count, type, start * size, geometry.maxInstancedCount );
 
-		extension.drawElementsInstancedANGLE( mode, count, type, start * size, geometry.maxInstancedCount );
+        */
+
+		_gl.drawElementsInstanced( mode, count, type, start * size, geometry.maxInstancedCount );
 
 		_infoRender.calls ++;
 		_infoRender.vertices += count * geometry.maxInstancedCount;

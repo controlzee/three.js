@@ -242,7 +242,6 @@ THREE.WebGLRenderer = function ( parameters ) {
 	extensions.get( 'OES_texture_half_float' );
 	extensions.get( 'OES_texture_half_float_linear' );
 	extensions.get( 'OES_standard_derivatives' );
-	extensions.get( 'ANGLE_instanced_arrays' );
 
 	if ( extensions.get( 'OES_element_index_uint' ) ) {
 
@@ -924,7 +923,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		var extension;
 
-		if ( geometry instanceof THREE.InstancedBufferGeometry ) {
+		/* if ( geometry instanceof THREE.InstancedBufferGeometry ) {
 
 			extension = extensions.get( 'ANGLE_instanced_arrays' );
 
@@ -935,7 +934,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			}
 
-		}
+		}*/ 
 
 		if ( startIndex === undefined ) startIndex = 0;
 

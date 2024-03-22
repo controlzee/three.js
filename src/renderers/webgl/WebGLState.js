@@ -114,9 +114,12 @@ THREE.WebGLState = function ( gl, extensions, paramThreeToGL ) {
 
 		if ( attributeDivisors[ attribute ] !== 0 ) {
 
-			var extension = extensions.get( 'ANGLE_instanced_arrays' );
+			/*
+            var extension = extensions.get( 'ANGLE_instanced_arrays' ); 
+            extension.vertexAttribDivisorANGLE( attribute, 0 );
+            */
 
-			extension.vertexAttribDivisorANGLE( attribute, 0 );
+            gl.vertexAttribDivisor(attribute, 0)
 			attributeDivisors[ attribute ] = 0;
 
 		}
@@ -136,7 +139,8 @@ THREE.WebGLState = function ( gl, extensions, paramThreeToGL ) {
 
 		if ( attributeDivisors[ attribute ] !== meshPerAttribute ) {
 
-			extension.vertexAttribDivisorANGLE( attribute, meshPerAttribute );
+            gl.vertexAttribDivisor(attribute, meshPerAttribute)
+			// extension.vertexAttribDivisorANGLE( attribute, meshPerAttribute );
 			attributeDivisors[ attribute ] = meshPerAttribute;
 
 		}
