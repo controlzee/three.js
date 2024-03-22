@@ -25111,7 +25111,6 @@ THREE.WebGLRenderer = function ( parameters ) {
 	extensions.get( 'OES_texture_half_float' );
 	extensions.get( 'OES_texture_half_float_linear' );
 	extensions.get( 'OES_standard_derivatives' );
-	extensions.get( 'ANGLE_instanced_arrays' );
 
 	if ( extensions.get( 'OES_element_index_uint' ) ) {
 
@@ -25793,7 +25792,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		var extension;
 
-		if ( geometry instanceof THREE.InstancedBufferGeometry ) {
+		/* if ( geometry instanceof THREE.InstancedBufferGeometry ) {
 
 			extension = extensions.get( 'ANGLE_instanced_arrays' );
 
@@ -25804,7 +25803,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			}
 
-		}
+		}*/ 
 
 		if ( startIndex === undefined ) startIndex = 0;
 
@@ -27873,14 +27872,14 @@ THREE.WebGLBufferRenderer = function ( _gl, extensions, _infoRender ) {
 
 	function renderInstances( geometry ) {
 
-		var extension = extensions.get( 'ANGLE_instanced_arrays' );
+		/* var extension = extensions.get( 'ANGLE_instanced_arrays' );
 
 		if ( extension === null ) {
 
 			console.error( 'THREE.WebGLBufferRenderer: using THREE.InstancedBufferGeometry but hardware does not support extension ANGLE_instanced_arrays.' );
 			return;
 
-		}
+		} */ 
 
 		var position = geometry.attributes.position;
 
@@ -27890,13 +27889,15 @@ THREE.WebGLBufferRenderer = function ( _gl, extensions, _infoRender ) {
 
 			count = position.data.count;
 
-			extension.drawArraysInstancedANGLE( mode, 0, count, geometry.maxInstancedCount );
+			// extension.drawArraysInstancedANGLE( mode, 0, count, geometry.maxInstancedCount );
+            _gl.drawArraysInstanced( mode, 0, count, geometry.maxInstancedCount );
 
 		} else {
 
 			count = position.count;
 
-			extension.drawArraysInstancedANGLE( mode, 0, count, geometry.maxInstancedCount );
+			// extension.drawArraysInstancedANGLE( mode, 0, count, geometry.maxInstancedCount );
+            _gl.drawArraysInstanced( mode, 0, count, geometry.maxInstancedCount );
 
 		}
 
@@ -28113,16 +28114,20 @@ THREE.WebGLIndexedBufferRenderer = function ( _gl, extensions, _infoRender ) {
 
 	function renderInstances( geometry, start, count ) {
 
-		var extension = extensions.get( 'ANGLE_instanced_arrays' );
+		/* var extension = extensions.get( 'ANGLE_instanced_arrays' );
 
 		if ( extension === null ) {
 
 			console.error( 'THREE.WebGLBufferRenderer: using THREE.InstancedBufferGeometry but hardware does not support extension ANGLE_instanced_arrays.' );
 			return;
 
-		}
+		} 
+        
+        extension.drawElementsInstancedANGLE( mode, count, type, start * size, geometry.maxInstancedCount );
 
-		extension.drawElementsInstancedANGLE( mode, count, type, start * size, geometry.maxInstancedCount );
+        */
+
+		_gl.drawElementsInstanced( mode, count, type, start * size, geometry.maxInstancedCount );
 
 		_infoRender.calls ++;
 		_infoRender.vertices += count * geometry.maxInstancedCount;
@@ -30423,9 +30428,12 @@ THREE.WebGLState = function ( gl, extensions, paramThreeToGL ) {
 
 		if ( attributeDivisors[ attribute ] !== 0 ) {
 
-			var extension = extensions.get( 'ANGLE_instanced_arrays' );
+			/*
+            var extension = extensions.get( 'ANGLE_instanced_arrays' ); 
+            extension.vertexAttribDivisorANGLE( attribute, 0 );
+            */
 
-			extension.vertexAttribDivisorANGLE( attribute, 0 );
+            gl.vertexAttribDivisor(attribute, 0)
 			attributeDivisors[ attribute ] = 0;
 
 		}
@@ -30445,7 +30453,8 @@ THREE.WebGLState = function ( gl, extensions, paramThreeToGL ) {
 
 		if ( attributeDivisors[ attribute ] !== meshPerAttribute ) {
 
-			extension.vertexAttribDivisorANGLE( attribute, meshPerAttribute );
+            gl.vertexAttribDivisor(attribute, meshPerAttribute)
+			// extension.vertexAttribDivisorANGLE( attribute, meshPerAttribute );
 			attributeDivisors[ attribute ] = meshPerAttribute;
 
 		}
