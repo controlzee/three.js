@@ -99,20 +99,20 @@
 		shadowCoord.xyz /= shadowCoord.w;
 		shadowCoord.z += shadowBias;
 
-		// if ( something && something ) breaks ATI OpenGL shader compiler
-		// if ( all( something, something ) ) using this instead
+		float x = (shadowCoord.x - 0.5) * 2.0;
+		float y = (shadowCoord.y - 0.5) * 2.0;
+		float circle =  x * x + y * y;
+		if ( circle < 1.0 ) {
+			float lerp = clamp ((1.0 - circle) * 2.5, 0.0, 1.0); // this is a lerp but in distance squared space 1/2.5 = 1/6.25
 
-		bvec4 inFrustumVec = bvec4 ( shadowCoord.x >= 0.0, shadowCoord.x <= 1.0, shadowCoord.y >= 0.0, shadowCoord.y <= 1.0 );
-		bool inFrustum = all( inFrustumVec );
+			if( lerp < 1.0 ) { // optional conditional, faster with or without?
+				// easy in easy out feather
+				lerp = 0.5 - 0.5 * cos(lerp * 3.14159265359);
+			}
 
-		bvec2 frustumTestVec = bvec2( inFrustum, shadowCoord.z <= 1.0 );
+			float a = getShadowSample(shadowMap, shadowMapSize, shadowBias, shadowRadius, shadowCoord);
 
-		bool frustumTest = all( frustumTestVec );
-
-		if ( frustumTest ) {
-
-			return getShadowSample(shadowMap, shadowMapSize, shadowBias, shadowRadius, shadowCoord);
-
+			return (a * lerp + (1.0 - lerp));
 		}
 
 		return 1.0;
@@ -131,13 +131,25 @@
 		bvec4 inFrustumVec = bvec4 ( shadowCoordA.x >= 0.0, shadowCoordA.x <= 1.0, shadowCoordA.y >= 0.0, shadowCoordA.y <= 1.0 );
 		bool inFrustum = all( inFrustumVec );
 
-		bvec2 frustumTestVec = bvec2( inFrustum, shadowCoordA.z <= 1.0 );
+		float Ax = (shadowCoordA.x - 0.5) * 2.0;
+		float Ay = (shadowCoordA.y - 0.5) * 2.0;
+		float circle =  Ax * Ax + Ay * Ay; // dodging square root 1*1 = 1
+		if ( circle < 1.0 ) {
+			float lerp = clamp ((1.0 - circle) * 2.5, 0.0, 1.0); // this is a lerp but in distance squared space 1/2.5 = 1/6.25
 
-		bool frustumTest = all( frustumTestVec );
+			if( lerp < 1.0 ) { // optional conditional, faster with or without?
+				// easy in easy out feather
+				lerp = 0.5 - 0.5 * cos(lerp * 3.14159265359);
+			}
 
-		if ( frustumTest ) {
+			float a = getShadowSample(shadowMapA, shadowMapSizeA, shadowBias, shadowRadius, shadowCoordA);
 
-			return getShadowSample(shadowMapA, shadowMapSizeA, shadowBias, shadowRadius, shadowCoordA);
+			float b = 1.0;
+			if( lerp < 1.0 ) {
+					b = getShadowSample(shadowMapB, shadowMapSizeB, shadowBias, shadowRadius, shadowCoordB);
+			}
+
+			return (a * lerp + b * (1.0 - lerp));
 
 		}
 		else
@@ -145,9 +157,9 @@
 			inFrustumVec = bvec4 ( shadowCoordB.x >= 0.0, shadowCoordB.x <= 1.0, shadowCoordB.y >= 0.0, shadowCoordB.y <= 1.0 );
 			inFrustum = all( inFrustumVec );
 
-			frustumTestVec = bvec2( inFrustum, shadowCoordB.z <= 1.0 );
+			bvec2 frustumTestVec = bvec2( inFrustum, shadowCoordB.z <= 1.0 );
 
-			frustumTest = all( frustumTestVec );
+			bool frustumTest = all( frustumTestVec );
 			if ( frustumTest ) {
 				return getShadowSample(shadowMapB, shadowMapSizeB, shadowBias, shadowRadius, shadowCoordB);
 			}
