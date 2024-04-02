@@ -94,17 +94,56 @@
 	#endif
 	}
 
+	// float getShadow( sampler2D shadowMap, vec2 shadowMapSize, float shadowBias, float shadowRadius, vec4 shadowCoord ) {
+
+	// 	shadowCoord.xyz /= shadowCoord.w;
+	// 	shadowCoord.z += shadowBias;
+
+	// 	if(shadowCoord.z <= 1.0) {
+	// 		float x = (shadowCoord.x - 0.5) * 2.0;
+	// 		float y = (shadowCoord.y - 0.5) * 2.0;
+	// 		float circle =  x * x + y * y;
+	// 		if ( circle < 1.0 ) {
+	// 			float lerp = clamp ((1.0 - circle) * 2.5, 0.0, 1.0); // this is a lerp but in distance squared space
+
+	// 			if( lerp < 1.0 ) { // optional conditional, faster with or without?
+	// 				// easy in easy out feather
+	// 				lerp = 0.5 - 0.5 * cos(lerp * 3.14159265359);
+	// 			}
+
+	// 			float a = getShadowSample(shadowMap, shadowMapSize, shadowBias, shadowRadius, shadowCoord);
+
+	// 			return (a * lerp + (1.0 - lerp));
+	// 		}
+	// 	}
+
+	// 	return 1.0;
+
+	// }
+
+	float sdRoundBox( vec2 p, vec2 b, float r )
+	{
+		vec2 q = abs(p) - b + r;
+		return length(max(q,0.0)) + min(max(q.x,q.y),0.0) - r;
+	}
+
+	float circleDist( vec2 p )
+	{
+		float x = (p.x - 0.5) * 2.0;
+		float y = (p.y - 0.5) * 2.0;
+		return(x * x + y * y); // dodging square root 1*1 = 1
+	}
+
 	float getShadow( sampler2D shadowMap, vec2 shadowMapSize, float shadowBias, float shadowRadius, vec4 shadowCoord ) {
 
 		shadowCoord.xyz /= shadowCoord.w;
 		shadowCoord.z += shadowBias;
 
 		if(shadowCoord.z <= 1.0) {
-			float x = (shadowCoord.x - 0.5) * 2.0;
-			float y = (shadowCoord.y - 0.5) * 2.0;
-			float circle =  x * x + y * y;
-			if ( circle < 1.0 ) {
-				float lerp = clamp ((1.0 - circle) * 2.5, 0.0, 1.0); // this is a lerp but in distance squared space 1/2.5 = 1/6.25
+			// float dist = sdRoundBox(shadowCoord.xy - vec2(0.5, 0.5), vec2(0.5, 0.5), 0.25);
+			float dist = -1.0 + circleDist(shadowCoord.xy); // d^2
+			if ( dist < 0.0 ) {
+				float lerp = 1.0 - clamp ((1.0 + dist * 2.5), 0.0, 1.0);
 
 				if( lerp < 1.0 ) { // optional conditional, faster with or without?
 					// easy in easy out feather
@@ -130,15 +169,10 @@
 		// if ( something && something ) breaks ATI OpenGL shader compiler
 		// if ( all( something, something ) ) using this instead
 
-		// bvec4 inFrustumVec = bvec4 ( shadowCoordA.x >= 0.0, shadowCoordA.x <= 1.0, shadowCoordA.y >= 0.0, shadowCoordA.y <= 1.0 );
-		// bool inFrustum = all( inFrustumVec );
-
-		float Ax = (shadowCoordA.x - 0.5) * 2.0;
-		float Ay = (shadowCoordA.y - 0.5) * 2.0;
-		float circle =  Ax * Ax + Ay * Ay; // dodging square root 1*1 = 1
+		float circle =  circleDist(shadowCoordA.xy);
 
 		if ( all (bvec2(circle < 1.0, shadowCoordA.z <= 1.0))  ) {
-			float lerp = clamp ((1.0 - circle) * 2.5, 0.0, 1.0); // this is a lerp but in distance squared space 1/2.5 = 1/6.25
+			float lerp = clamp ((1.0 - circle) * 2.5, 0.0, 1.0); // this is a lerp but in distance squared space
 
 			if( lerp < 1.0 ) { // optional conditional, faster with or without?
 				// easy in easy out feather
