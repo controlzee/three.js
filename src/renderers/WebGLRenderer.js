@@ -839,6 +839,10 @@ THREE.WebGLRenderer = function ( parameters ) {
 						renderer.setMode( _gl.POINTS );
 						break;
 
+					case THREE.LinesDrawMode:
+						renderer.setMode( _gl.LINES );
+						break;
+
 				}
 
 			}

@@ -315,6 +315,7 @@ Object.assign( THREE, {
 	TriangleStripDrawMode: 1,
 	TriangleFanDrawMode: 2,
 	PointsDrawMode: 3,
+	LinesDrawMode: 4,
 
 	// Texture Encodings
 
@@ -25706,6 +25707,10 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 					case THREE.PointsDrawMode:
 						renderer.setMode( _gl.POINTS );
+						break;
+
+					case THREE.LinesDrawMode:
+						renderer.setMode( _gl.LINES );
 						break;
 
 				}
