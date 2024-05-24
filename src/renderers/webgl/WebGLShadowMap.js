@@ -180,6 +180,14 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 
 		projectObject( scene, camera, shadowCamera );
 
+    performance.dbbScopeBegin?.("scene.customShadowRenderLoop", "", 0);
+    scene.customShadowRenderLoop?.(_frustum, (obj) => {
+      obj.modelViewMatrix.multiplyMatrices( shadowCamera.matrixWorldInverse, obj.matrixWorld );
+
+      _renderList.push(obj);
+    });
+    performance.dbbScopeEnd?.();
+
 		// render shadow map
 		// render regular objects
 

@@ -14,6 +14,8 @@ THREE.Scene = function () {
 
 	this.autoUpdate = true; // checked by the renderer
 
+  this.customRenderLoop = null;
+  this.customShadowRenderLoop = null;
 };
 
 THREE.Scene.prototype = Object.create( THREE.Object3D.prototype );
