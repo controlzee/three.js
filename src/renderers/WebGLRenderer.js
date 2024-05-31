@@ -1199,31 +1199,31 @@ THREE.WebGLRenderer = function ( parameters ) {
 		_localClippingEnabled = this.localClippingEnabled;
 		_clippingEnabled = _clipping.init( this.clippingPlanes, _localClippingEnabled, camera );
 
-		performance.dbbScopeBegin?.("projectObject", __filename, 0);
+		if (performance.dbbScopeBegin) { performance.dbbScopeBegin("projectObject", __filename, 0); }
 		projectObject( scene, camera );
-		performance.dbbScopeEnd?.();
+		if (performance.dbbScopeEnd) { performance.dbbScopeEnd(); }
 
-		performance.dbbScopeBegin?.("scene.customRenderLoop", "", 0);
-		scene.customRenderLoop?.((object, material, z) => {
+		if (performance.dbbScopeBegin) { performance.dbbScopeBegin("scene.customRenderLoop", "", 0); }
+		if(scene.customRenderLoop) scene.customRenderLoop((object, material, z) => {
 			pushRenderItem(object, objects.update(object), material, z, null);
 		}, pass);
-		performance.dbbScopeEnd?.();
+		if (performance.dbbScopeEnd) { performance.dbbScopeEnd(); }
 
 		opaqueObjects.length = opaqueObjectsLastIndex + 1;
 		transparentObjects.length = transparentObjectsLastIndex + 1;
 
 		if ( _this.sortObjects === true ) {
-			performance.dbbScopeBegin?.("sort", __filename, 0);
+			if (performance.dbbScopeBegin) { performance.dbbScopeBegin("sort", __filename, 0); }
 
 			opaqueObjects.sort( painterSortStable );
 			transparentObjects.sort( reversePainterSortStable );
-			performance.dbbScopeEnd?.();
+			if (performance.dbbScopeEnd) { performance.dbbScopeEnd(); }
 
 		}
 
 		//
 
-		performance.dbbScopeBegin?.("shadows", __filename, 0);
+		if (performance.dbbScopeBegin) { performance.dbbScopeBegin("shadows", __filename, 0); }
 		if ( _clippingEnabled ) _clipping.beginShadows();
 
 		setupShadows( lights );
@@ -1233,7 +1233,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 		setupLights( lights, camera );
 
 		if ( _clippingEnabled ) _clipping.endShadows();
-		performance.dbbScopeEnd?.();
+		if (performance.dbbScopeEnd) { performance.dbbScopeEnd(); }
 
 		//
 
@@ -1252,7 +1252,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		//
 
-		performance.dbbScopeBegin?.("background", __filename, 0);
+		if (performance.dbbScopeBegin) { performance.dbbScopeBegin("background", __filename, 0); }
 		var background = scene.background;
 
 		if ( background === null ) {
@@ -1290,11 +1290,11 @@ THREE.WebGLRenderer = function ( parameters ) {
 			_this.renderBufferDirect( backgroundCamera, null, backgroundPlaneMesh.geometry, backgroundPlaneMesh.material, backgroundPlaneMesh, null );
 
 		}
-		performance.dbbScopeEnd?.();
+		if (performance.dbbScopeEnd) { performance.dbbScopeEnd(); }
 
 		//
 
-		performance.dbbScopeBegin?.("renderObjects", __filename, 0);
+		if (performance.dbbScopeBegin) { performance.dbbScopeBegin("renderObjects", __filename, 0); }
 		if ( scene.overrideMaterial ) {
 
 			var overrideMaterial = scene.overrideMaterial;
@@ -1314,7 +1314,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 			renderObjects( transparentObjects, camera, fog );
 
 		}
-		performance.dbbScopeEnd?.();
+		if (performance.dbbScopeEnd) { performance.dbbScopeEnd(); }
 
 		// custom render plugins (post pass)
 
