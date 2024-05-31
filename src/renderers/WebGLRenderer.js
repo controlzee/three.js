@@ -1147,18 +1147,18 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	}
 
-	this.renderShadowsIntoMap = function ( scene, camera, light, shadow ) {
+	this.renderShadowsIntoMap = function ( scene, camera, light, shadow, passType ) {
 
 		lights.length = 0;
 		setupShadows( lights );
 
-		shadowMap.renderIntoMap( scene, camera, light, shadow );
+		shadowMap.renderIntoMap( scene, camera, light, shadow, passType );
 
 		setupLights( lights, camera );
 
 	}
 
-	this.render = function ( scene, camera, renderTarget, forceClear ) {
+	this.render = function ( scene, camera, renderTarget, forceClear, pass ) {
 
 		if ( camera instanceof THREE.Camera === false ) {
 
@@ -1199,29 +1199,41 @@ THREE.WebGLRenderer = function ( parameters ) {
 		_localClippingEnabled = this.localClippingEnabled;
 		_clippingEnabled = _clipping.init( this.clippingPlanes, _localClippingEnabled, camera );
 
+		performance.dbbScopeBegin?.("projectObject", __filename, 0);
 		projectObject( scene, camera );
+		performance.dbbScopeEnd?.();
+
+		performance.dbbScopeBegin?.("scene.customRenderLoop", "", 0);
+		scene.customRenderLoop?.((object, material, z) => {
+			pushRenderItem(object, objects.update(object), material, z, null);
+		}, pass);
+		performance.dbbScopeEnd?.();
 
 		opaqueObjects.length = opaqueObjectsLastIndex + 1;
 		transparentObjects.length = transparentObjectsLastIndex + 1;
 
 		if ( _this.sortObjects === true ) {
+			performance.dbbScopeBegin?.("sort", __filename, 0);
 
 			opaqueObjects.sort( painterSortStable );
 			transparentObjects.sort( reversePainterSortStable );
+			performance.dbbScopeEnd?.();
 
 		}
 
 		//
 
+		performance.dbbScopeBegin?.("shadows", __filename, 0);
 		if ( _clippingEnabled ) _clipping.beginShadows();
 
 		setupShadows( lights );
 
-		shadowMap.render( scene, camera );
+		shadowMap.render( scene, camera, pass );
 
 		setupLights( lights, camera );
 
 		if ( _clippingEnabled ) _clipping.endShadows();
+		performance.dbbScopeEnd?.();
 
 		//
 
@@ -1240,6 +1252,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		//
 
+		performance.dbbScopeBegin?.("background", __filename, 0);
 		var background = scene.background;
 
 		if ( background === null ) {
@@ -1252,7 +1265,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		}
 
-		if ( this.autoClear || forceClear ) {
+			if ( this.autoClear || forceClear ) {
 
 			this.clear( this.autoClearColor, this.autoClearDepth, this.autoClearStencil );
 
@@ -1277,9 +1290,11 @@ THREE.WebGLRenderer = function ( parameters ) {
 			_this.renderBufferDirect( backgroundCamera, null, backgroundPlaneMesh.geometry, backgroundPlaneMesh.material, backgroundPlaneMesh, null );
 
 		}
+		performance.dbbScopeEnd?.();
 
 		//
 
+		performance.dbbScopeBegin?.("renderObjects", __filename, 0);
 		if ( scene.overrideMaterial ) {
 
 			var overrideMaterial = scene.overrideMaterial;
@@ -1299,6 +1314,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 			renderObjects( transparentObjects, camera, fog );
 
 		}
+		performance.dbbScopeEnd?.();
 
 		// custom render plugins (post pass)
 
@@ -2729,9 +2745,9 @@ THREE.WebGLRenderer = function ( parameters ) {
 				}
 
 				if ( texture.type !== THREE.UnsignedByteType &&
-				     paramThreeToGL( texture.type ) !== _gl.getParameter( _gl.IMPLEMENTATION_COLOR_READ_TYPE ) &&
-				     ! ( texture.type === THREE.FloatType && extensions.get( 'WEBGL_color_buffer_float' ) ) &&
-				     ! ( texture.type === THREE.HalfFloatType && extensions.get( 'EXT_color_buffer_half_float' ) ) ) {
+						 paramThreeToGL( texture.type ) !== _gl.getParameter( _gl.IMPLEMENTATION_COLOR_READ_TYPE ) &&
+						 ! ( texture.type === THREE.FloatType && extensions.get( 'WEBGL_color_buffer_float' ) ) &&
+						 ! ( texture.type === THREE.HalfFloatType && extensions.get( 'EXT_color_buffer_half_float' ) ) ) {
 
 					console.error( 'THREE.WebGLRenderer.readRenderTargetPixels: renderTarget is not in UnsignedByteType or implementation defined type.' );
 					return;
