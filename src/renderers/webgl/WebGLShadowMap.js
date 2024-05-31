@@ -124,7 +124,7 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 
 	}
 
-	this.renderShadowMap = function( scene, camera, shadowMap, shadowMatrix, light, shadowCamera, faceCount, isPointLight ) {
+	this.renderShadowMap = function( scene, camera, shadowMap, shadowMatrix, light, shadowCamera, faceCount, isPointLight, passType ) {
 
 		_lightPositionWorld.setFromMatrixPosition( light.matrixWorld );
 		shadowCamera.position.copy( _lightPositionWorld );
@@ -185,7 +185,7 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
       obj.modelViewMatrix.multiplyMatrices( shadowCamera.matrixWorldInverse, obj.matrixWorld );
 
       _renderList.push(obj);
-    });
+    }, passType);
     performance.dbbScopeEnd?.();
 
 		// render shadow map
@@ -229,7 +229,7 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 
 }
 
-	this.renderIntoMap = function ( scene, camera, light, shadow ) {
+	this.renderIntoMap = function ( scene, camera, light, shadow, passType ) {
 
 		var faceCount = 1;
 		var isPointLight = false;
@@ -249,7 +249,7 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 		_state.setDepthTest( true );
 		_state.setScissorTest( false );
 
-		this.renderShadowMap( scene, camera, shadow.map, shadow.matrix, light, shadowCamera, faceCount, isPointLight);
+		this.renderShadowMap( scene, camera, shadow.map, shadow.matrix, light, shadowCamera, faceCount, isPointLight, passType);
 
 		// Restore GL state.
 		var clearColor = _renderer.getClearColor(),
@@ -260,7 +260,7 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 		scope.needsUpdate = false;
 	}
 
-	this.render = function ( scene, camera ) {
+	this.render = function ( scene, camera, passType ) {
 
 		if ( scope.enabled === false ) return;
 		if ( scope.autoUpdate === false && scope.needsUpdate === false ) return;
@@ -353,7 +353,7 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 
 			}
 
-			this.renderShadowMap( scene, camera, shadow.map, shadow.matrix, light, shadowCamera, faceCount, isPointLight);
+			this.renderShadowMap( scene, camera, shadow.map, shadow.matrix, light, shadowCamera, faceCount, isPointLight, passType);
 		}
 
 			// Restore GL state.

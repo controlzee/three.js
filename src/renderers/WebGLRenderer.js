@@ -1147,12 +1147,12 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	}
 
-	this.renderShadowsIntoMap = function ( scene, camera, light, shadow ) {
+	this.renderShadowsIntoMap = function ( scene, camera, light, shadow, passType ) {
 
 		lights.length = 0;
 		setupShadows( lights );
 
-		shadowMap.renderIntoMap( scene, camera, light, shadow );
+		shadowMap.renderIntoMap( scene, camera, light, shadow, passType );
 
 		setupLights( lights, camera );
 
@@ -1228,7 +1228,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		setupShadows( lights );
 
-		shadowMap.render( scene, camera );
+		shadowMap.render( scene, camera, pass );
 
 		setupLights( lights, camera );
 
