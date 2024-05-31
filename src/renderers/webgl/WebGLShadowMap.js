@@ -180,13 +180,13 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 
 		projectObject( scene, camera, shadowCamera );
 
-    performance.dbbScopeBegin?.("scene.customShadowRenderLoop", "", 0);
-    scene.customShadowRenderLoop?.(_frustum, (obj) => {
-      obj.modelViewMatrix.multiplyMatrices( shadowCamera.matrixWorldInverse, obj.matrixWorld );
+		performance.dbbScopeBegin?.("scene.customShadowRenderLoop", "", 0);
+		scene.customShadowRenderLoop?.(_frustum, (obj) => {
+			obj.modelViewMatrix.multiplyMatrices( shadowCamera.matrixWorldInverse, obj.matrixWorld );
 
-      _renderList.push(obj);
-    }, passType);
-    performance.dbbScopeEnd?.();
+			_renderList.push(obj);
+		}, passType);
+		performance.dbbScopeEnd?.();
 
 		// render shadow map
 		// render regular objects
@@ -452,13 +452,13 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 
 		if ( customMaterial !== undefined ) {
 
-      result.side = customMaterial.overrideShadowDepthSide;
+			result.side = customMaterial.overrideShadowDepthSide;
 
-    } else {
+		} else {
 
-      result.side = side;
+			result.side = side;
 
-    }
+		}
 
 		result.clipShadows = material.clipShadows;
 		result.clippingPlanes = material.clippingPlanes;
