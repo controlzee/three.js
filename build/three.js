@@ -315,6 +315,7 @@ Object.assign( THREE, {
 	TriangleStripDrawMode: 1,
 	TriangleFanDrawMode: 2,
 	PointsDrawMode: 3,
+	LinesDrawMode: 4,
 
 	// Texture Encodings
 
@@ -23860,6 +23861,8 @@ THREE.Scene = function () {
 
 	this.autoUpdate = true; // checked by the renderer
 
+	this.customRenderLoop = null;
+	this.customShadowRenderLoop = null;
 };
 
 THREE.Scene.prototype = Object.create( THREE.Object3D.prototype );
@@ -25708,6 +25711,10 @@ THREE.WebGLRenderer = function ( parameters ) {
 						renderer.setMode( _gl.POINTS );
 						break;
 
+					case THREE.LinesDrawMode:
+						renderer.setMode( _gl.LINES );
+						break;
+
 				}
 
 			}
@@ -26012,18 +26019,18 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	}
 
-	this.renderShadowsIntoMap = function ( scene, camera, light, shadow ) {
+	this.renderShadowsIntoMap = function ( scene, camera, light, shadow, passType ) {
 
 		lights.length = 0;
 		setupShadows( lights );
 
-		shadowMap.renderIntoMap( scene, camera, light, shadow );
+		shadowMap.renderIntoMap( scene, camera, light, shadow, passType );
 
 		setupLights( lights, camera );
 
 	}
 
-	this.render = function ( scene, camera, renderTarget, forceClear ) {
+	this.render = function ( scene, camera, renderTarget, forceClear, pass ) {
 
 		if ( camera instanceof THREE.Camera === false ) {
 
@@ -26064,29 +26071,41 @@ THREE.WebGLRenderer = function ( parameters ) {
 		_localClippingEnabled = this.localClippingEnabled;
 		_clippingEnabled = _clipping.init( this.clippingPlanes, _localClippingEnabled, camera );
 
+		if (performance.dbbScopeBegin) { performance.dbbScopeBegin("projectObject", __filename, 0); }
 		projectObject( scene, camera );
+		if (performance.dbbScopeEnd) { performance.dbbScopeEnd(); }
+
+		if (performance.dbbScopeBegin) { performance.dbbScopeBegin("scene.customRenderLoop", "", 0); }
+		if(scene.customRenderLoop) scene.customRenderLoop((object, material, z) => {
+			pushRenderItem(object, objects.update(object), material, z, null);
+		}, pass);
+		if (performance.dbbScopeEnd) { performance.dbbScopeEnd(); }
 
 		opaqueObjects.length = opaqueObjectsLastIndex + 1;
 		transparentObjects.length = transparentObjectsLastIndex + 1;
 
 		if ( _this.sortObjects === true ) {
+			if (performance.dbbScopeBegin) { performance.dbbScopeBegin("sort", __filename, 0); }
 
 			opaqueObjects.sort( painterSortStable );
 			transparentObjects.sort( reversePainterSortStable );
+			if (performance.dbbScopeEnd) { performance.dbbScopeEnd(); }
 
 		}
 
 		//
 
+		if (performance.dbbScopeBegin) { performance.dbbScopeBegin("shadows", __filename, 0); }
 		if ( _clippingEnabled ) _clipping.beginShadows();
 
 		setupShadows( lights );
 
-		shadowMap.render( scene, camera );
+		shadowMap.render( scene, camera, pass );
 
 		setupLights( lights, camera );
 
 		if ( _clippingEnabled ) _clipping.endShadows();
+		if (performance.dbbScopeEnd) { performance.dbbScopeEnd(); }
 
 		//
 
@@ -26105,6 +26124,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		//
 
+		if (performance.dbbScopeBegin) { performance.dbbScopeBegin("background", __filename, 0); }
 		var background = scene.background;
 
 		if ( background === null ) {
@@ -26117,7 +26137,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		}
 
-		if ( this.autoClear || forceClear ) {
+			if ( this.autoClear || forceClear ) {
 
 			this.clear( this.autoClearColor, this.autoClearDepth, this.autoClearStencil );
 
@@ -26142,9 +26162,11 @@ THREE.WebGLRenderer = function ( parameters ) {
 			_this.renderBufferDirect( backgroundCamera, null, backgroundPlaneMesh.geometry, backgroundPlaneMesh.material, backgroundPlaneMesh, null );
 
 		}
+		if (performance.dbbScopeEnd) { performance.dbbScopeEnd(); }
 
 		//
 
+		if (performance.dbbScopeBegin) { performance.dbbScopeBegin("renderObjects", __filename, 0); }
 		if ( scene.overrideMaterial ) {
 
 			var overrideMaterial = scene.overrideMaterial;
@@ -26164,6 +26186,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 			renderObjects( transparentObjects, camera, fog );
 
 		}
+		if (performance.dbbScopeEnd) { performance.dbbScopeEnd(); }
 
 		// custom render plugins (post pass)
 
@@ -27594,9 +27617,9 @@ THREE.WebGLRenderer = function ( parameters ) {
 				}
 
 				if ( texture.type !== THREE.UnsignedByteType &&
-				     paramThreeToGL( texture.type ) !== _gl.getParameter( _gl.IMPLEMENTATION_COLOR_READ_TYPE ) &&
-				     ! ( texture.type === THREE.FloatType && extensions.get( 'WEBGL_color_buffer_float' ) ) &&
-				     ! ( texture.type === THREE.HalfFloatType && extensions.get( 'EXT_color_buffer_half_float' ) ) ) {
+						 paramThreeToGL( texture.type ) !== _gl.getParameter( _gl.IMPLEMENTATION_COLOR_READ_TYPE ) &&
+						 ! ( texture.type === THREE.FloatType && extensions.get( 'WEBGL_color_buffer_float' ) ) &&
+						 ! ( texture.type === THREE.HalfFloatType && extensions.get( 'EXT_color_buffer_half_float' ) ) ) {
 
 					console.error( 'THREE.WebGLRenderer.readRenderTargetPixels: renderTarget is not in UnsignedByteType or implementation defined type.' );
 					return;
@@ -29933,7 +29956,7 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 
 	}
 
-	this.renderShadowMap = function( scene, camera, shadowMap, shadowMatrix, light, shadowCamera, faceCount, isPointLight ) {
+	this.renderShadowMap = function( scene, camera, shadowMap, shadowMatrix, light, shadowCamera, faceCount, isPointLight, passType ) {
 
 		_lightPositionWorld.setFromMatrixPosition( light.matrixWorld );
 		shadowCamera.position.copy( _lightPositionWorld );
@@ -29989,6 +30012,14 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 
 		projectObject( scene, camera, shadowCamera );
 
+		if (performance.dbbScopeBegin) { performance.dbbScopeBegin("scene.customShadowRenderLoop", "", 0); }
+		if(scene.customShadowRenderLoop) scene.customShadowRenderLoop(_frustum, (obj) => {
+			obj.modelViewMatrix.multiplyMatrices( shadowCamera.matrixWorldInverse, obj.matrixWorld );
+
+			_renderList.push(obj);
+		}, passType);
+		if (performance.dbbScopeEnd) { performance.dbbScopeEnd(); }
+
 		// render shadow map
 		// render regular objects
 
@@ -30030,7 +30061,7 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 
 }
 
-	this.renderIntoMap = function ( scene, camera, light, shadow ) {
+	this.renderIntoMap = function ( scene, camera, light, shadow, passType ) {
 
 		var faceCount = 1;
 		var isPointLight = false;
@@ -30050,7 +30081,7 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 		_state.setDepthTest( true );
 		_state.setScissorTest( false );
 
-		this.renderShadowMap( scene, camera, shadow.map, shadow.matrix, light, shadowCamera, faceCount, isPointLight);
+		this.renderShadowMap( scene, camera, shadow.map, shadow.matrix, light, shadowCamera, faceCount, isPointLight, passType);
 
 		// Restore GL state.
 		var clearColor = _renderer.getClearColor(),
@@ -30061,7 +30092,7 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 		scope.needsUpdate = false;
 	}
 
-	this.render = function ( scene, camera ) {
+	this.render = function ( scene, camera, passType ) {
 
 		if ( scope.enabled === false ) return;
 		if ( scope.autoUpdate === false && scope.needsUpdate === false ) return;
@@ -30154,7 +30185,7 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 
 			}
 
-			this.renderShadowMap( scene, camera, shadow.map, shadow.matrix, light, shadowCamera, faceCount, isPointLight);
+			this.renderShadowMap( scene, camera, shadow.map, shadow.matrix, light, shadowCamera, faceCount, isPointLight, passType);
 		}
 
 			// Restore GL state.
@@ -30253,13 +30284,13 @@ THREE.WebGLShadowMap = function ( _renderer, _lights, _objects ) {
 
 		if ( customMaterial !== undefined ) {
 
-      result.side = customMaterial.overrideShadowDepthSide;
+			result.side = customMaterial.overrideShadowDepthSide;
 
-    } else {
+		} else {
 
-      result.side = side;
+			result.side = side;
 
-    }
+		}
 
 		result.clipShadows = material.clipShadows;
 		result.clippingPlanes = material.clippingPlanes;

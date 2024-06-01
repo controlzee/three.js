@@ -313,6 +313,7 @@ Object.assign( THREE, {
 	TriangleStripDrawMode: 1,
 	TriangleFanDrawMode: 2,
 	PointsDrawMode: 3,
+	LinesDrawMode: 4,
 
 	// Texture Encodings
 
