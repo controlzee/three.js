@@ -22778,6 +22778,8 @@ THREE.Mesh = function ( geometry, material ) {
 
 	this.ignoreRaycasts = false;
 
+	this.maxInstancedCount = undefined;
+
 	this.updateMorphTargets();
 
 };
@@ -25745,11 +25747,12 @@ THREE.WebGLRenderer = function ( parameters ) {
 		}
 
 		if ( geometry instanceof THREE.InstancedBufferGeometry ) {
-
-			if ( geometry.maxInstancedCount > 0 ) {
-
-				renderer.renderInstances( geometry, drawStart, drawCount );
-
+			let instancedCount = geometry.maxInstancedCount;
+			if(instancedCount == 0 && object.maxInstancedCount) {
+				instancedCount = object.maxInstancedCount;
+			}
+			if ( instancedCount > 0 ) {
+				renderer.renderInstances( geometry, drawStart, drawCount, instancedCount);
 			}
 
 		} else {
@@ -27893,7 +27896,7 @@ THREE.WebGLBufferRenderer = function ( _gl, extensions, _infoRender ) {
 
 	}
 
-	function renderInstances( geometry ) {
+	function renderInstances( geometry, start, count, instancedCount ) {
 
 		/* var extension = extensions.get( 'ANGLE_instanced_arrays' );
 
@@ -27906,21 +27909,20 @@ THREE.WebGLBufferRenderer = function ( _gl, extensions, _infoRender ) {
 
 		var position = geometry.attributes.position;
 
-		var count = 0;
+		// var count = 0;
 
 		if ( position instanceof THREE.InterleavedBufferAttribute ) {
-
-			count = position.data.count;
+		// 	count = position.data.count;
 
 			// extension.drawArraysInstancedANGLE( mode, 0, count, geometry.maxInstancedCount );
-            _gl.drawArraysInstanced( mode, 0, count, geometry.maxInstancedCount );
+            _gl.drawArraysInstanced( mode, 0, position.data.count, instancedCount );
 
 		} else {
 
-			count = position.count;
+			// count = position.count;
 
 			// extension.drawArraysInstancedANGLE( mode, 0, count, geometry.maxInstancedCount );
-            _gl.drawArraysInstanced( mode, 0, count, geometry.maxInstancedCount );
+            _gl.drawArraysInstanced( mode, start, count, instancedCount );
 
 		}
 
@@ -28135,7 +28137,7 @@ THREE.WebGLIndexedBufferRenderer = function ( _gl, extensions, _infoRender ) {
 
 	}
 
-	function renderInstances( geometry, start, count ) {
+	function renderInstances( geometry, start, count, instancedCount) {
 
 		/* var extension = extensions.get( 'ANGLE_instanced_arrays' );
 
@@ -28150,7 +28152,7 @@ THREE.WebGLIndexedBufferRenderer = function ( _gl, extensions, _infoRender ) {
 
         */
 
-		_gl.drawElementsInstanced( mode, count, type, start * size, geometry.maxInstancedCount );
+		_gl.drawElementsInstanced( mode, count, type, start * size, instancedCount );
 
 		_infoRender.calls ++;
 		_infoRender.vertices += count * geometry.maxInstancedCount;

@@ -40,7 +40,7 @@ THREE.WebGLIndexedBufferRenderer = function ( _gl, extensions, _infoRender ) {
 
 	}
 
-	function renderInstances( geometry, start, count ) {
+	function renderInstances( geometry, start, count, instancedCount) {
 
 		/* var extension = extensions.get( 'ANGLE_instanced_arrays' );
 
@@ -55,7 +55,7 @@ THREE.WebGLIndexedBufferRenderer = function ( _gl, extensions, _infoRender ) {
 
         */
 
-		_gl.drawElementsInstanced( mode, count, type, start * size, geometry.maxInstancedCount );
+		_gl.drawElementsInstanced( mode, count, type, start * size, instancedCount );
 
 		_infoRender.calls ++;
 		_infoRender.vertices += count * geometry.maxInstancedCount;

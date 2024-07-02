@@ -21,6 +21,8 @@ THREE.Mesh = function ( geometry, material ) {
 
 	this.ignoreRaycasts = false;
 
+	this.maxInstancedCount = undefined;
+
 	this.updateMorphTargets();
 
 };
