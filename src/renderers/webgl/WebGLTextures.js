@@ -450,8 +450,15 @@ THREE.WebGLTextures = function ( _gl, extensions, state, properties, capabilitie
 			// need to change this internal format for WebGL2 in onr of our data textures
 			let glChangedInternalFormat = glFormat;
 			if(_isWebGL2) {
-				if(texture.type === THREE.FloatType && glFormat === _gl.RGB) {
-					glChangedInternalFormat = _gl.RGB32F;
+				if(texture.type === THREE.FloatType) {
+          if(glFormat === _gl.RGB)
+          {
+            glChangedInternalFormat = _gl.RGB32F;
+          }
+          else if(glFormat === _gl.RGBA)
+          {
+            glChangedInternalFormat = _gl.RGBA32F;
+          }
 				}
 			}
 
